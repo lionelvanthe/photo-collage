@@ -9,6 +9,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import app.aicalories.foodscan.photocollage.databinding.ActivityMainBinding
+import com.google.gson.Gson
 import com.outsbook.libs.canvaseditor.listeners.CanvasEditorListener
 
 class MainActivity : AppCompatActivity() {
@@ -154,5 +155,10 @@ class MainActivity : AppCompatActivity() {
                 //When the active sticker flip
             }
         })
+    }
+
+    private fun getDiyConfig() {
+        val jsonString = assets.open("template.json").bufferedReader().use { it.readText() }
+        val template = Gson().fromJson(jsonString, DiyConfig::class.java)
     }
 }
