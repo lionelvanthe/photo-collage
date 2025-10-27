@@ -10,7 +10,7 @@ import kotlin.math.pow
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
-internal abstract class Sticker {
+abstract class Sticker {
     val matrix = Matrix()
     var isFlippedHorizontally = false
     var isFlippedVertically = false
@@ -25,6 +25,9 @@ internal abstract class Sticker {
     abstract val width: Int
     abstract val height: Int
     abstract val drawable: Drawable
+    open val x: Float = 0f
+    open val y: Float = 0f
+    open val angle: Float = 0f
 
     val mappedBoundPoints: FloatArray
         get() {

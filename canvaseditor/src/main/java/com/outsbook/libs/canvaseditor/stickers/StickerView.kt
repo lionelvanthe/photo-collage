@@ -66,6 +66,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
     private var currentIcon: StickerIcon? = null
+    private var stickers = mutableListOf<Sticker>()
 
     init {
         configDefaultIcons()
@@ -164,7 +165,10 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     private fun drawStickers(canvas: Canvas) {
-        currentSticker?.draw(canvas)
+        stickers.forEach {
+            it.draw(canvas)
+        }
+
         if (currentSticker != null) {
             getStickerPoints(currentSticker, bitmapPoints)
             val x1 = bitmapPoints[0]
@@ -288,10 +292,30 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         currentMode = ActionMode.DRAG
         downX = event.x
         downY = event.y
+        if (currentSticker != null) {
+            currentIcon = findCurrentIconTouched()
+        } else {
+            currentIcon = null
+        }
+        if (currentIcon == null) {
+            val sticker = stickers.filter { it.contains(downX, downY) }
+                .maxByOrNull {
+                    val bounds = RectF(0f, 0f,
+                        it.width.toFloat(),
+                        it.height.toFloat()
+                    )
+                    it.matrix.mapRect(bounds)
+                    bounds.width() * bounds.height()
+                }
+            currentSticker = sticker
+            isTouchInsideSticker = sticker != null
+            invalidate()
+        } else {
+            isTouchInsideSticker = true
+        }
         midPoint = calculateMidPoint()
         oldDistance = calculateDistance(midPoint.x, midPoint.y, downX, downY)
         oldRotation = calculateRotation(midPoint.x, midPoint.y, downX, downY)
-        currentIcon = findCurrentIconTouched()
 
         if (currentIcon != null) {
             currentMode = ActionMode.ICON
@@ -299,16 +323,9 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         }
 
         if (currentSticker != null) {
-            isTouchInsideSticker = currentSticker!!.contains(downX, downY)
             downMatrix.set(Sticker.getMatrix(currentSticker!!))
         }
 
-        if (currentIcon == null && !isTouchInsideSticker) {
-            doneSticker(currentSticker)
-            return false
-        }
-
-        invalidate()
         return true
     }
 
@@ -378,91 +395,51 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     fun addSticker(sticker: Sticker): StickerView {
-        return addSticker(sticker, ConstantSticker.CENTER)
-    }
-
-    private fun addSticker(sticker: Sticker, position: Int): StickerView {
         if (ViewCompat.isLaidOut(this)) {
-            addStickerImmediately(sticker, position)
+            addStickerImmediately(sticker)
         } else {
-            post { addStickerImmediately(sticker, position) }
+            post { addStickerImmediately(sticker) }
         }
         return this
     }
 
-    private fun addStickerImmediately(sticker: Sticker, position: Int) {
-        setStickerPosition(sticker, position)
-        val scaleFactor: Float
-        val widthScaleFactor: Float = width.toFloat() / sticker.drawable.intrinsicWidth
-        val heightScaleFactor: Float = height.toFloat() / sticker.drawable.intrinsicHeight
-        scaleFactor =
-            if (widthScaleFactor > heightScaleFactor) heightScaleFactor else widthScaleFactor
-        sticker.matrix.postScale(
-            scaleFactor / 2,
-            scaleFactor / 2,
-            width / 2.toFloat(),
-            height / 2.toFloat()
-        )
+    private fun addStickerImmediately(sticker: Sticker) {
+        setStickerPosition(sticker)
         currentSticker = sticker
-        //stickers.add(sticker)
+        stickers.add(sticker)
         invalidate()
     }
 
-    private fun setStickerPosition(sticker: Sticker, position: Int) {
-        val width = width.toFloat()
-        val height = height.toFloat()
-        var offsetX = width - sticker.width
-        var offsetY = height - sticker.height
-        when {
-            position and ConstantSticker.TOP > 0 -> offsetY /= 4f
-            position and ConstantSticker.BOTTOM > 0 -> offsetY *= 3f / 4f
-            else -> offsetY /= 2f
-        }
-        when {
-            position and ConstantSticker.LEFT > 0 -> offsetX /= 4f
-            position and ConstantSticker.RIGHT > 0 -> offsetX *= 3f / 4f
-            else -> offsetX /= 2f
-        }
-        sticker.matrix.postTranslate(offsetX, offsetY)
-    }
-
-
-    fun addSticker(sticker: Sticker, x: Float, y: Float): StickerView {
+    fun addStickers(stickers: List<Sticker>): StickerView {
         if (ViewCompat.isLaidOut(this)) {
-            addStickerImmediately(sticker, x, y)
+            addStickersImmediately(stickers)
         } else {
-            post { addStickerImmediately(sticker, x, y) }
+            post { addStickersImmediately(stickers) }
         }
         return this
     }
 
-    private fun addStickerImmediately(sticker: Sticker, x: Float, y: Float) {
-        setStickerPosition(sticker, x, y)
-//        val scaleFactor: Float
-//        val widthScaleFactor: Float = width.toFloat() / sticker.drawable.intrinsicWidth
-//        val heightScaleFactor: Float = height.toFloat() / sticker.drawable.intrinsicHeight
-//        scaleFactor =
-//            if (widthScaleFactor > heightScaleFactor) heightScaleFactor else widthScaleFactor
-//        sticker.matrix.postScale(
-//            scaleFactor / 2,
-//            scaleFactor / 2,
-//            width / 2.toFloat(),
-//            height / 2.toFloat()
-//        )
-        currentSticker = sticker
-//        stickers.add(sticker)
+    private fun addStickersImmediately(stickers: List<Sticker>) {
+        stickers.forEach {
+            setStickerPosition(it)
+        }
+        this.stickers = stickers.toMutableList()
         invalidate()
     }
 
-    private fun setStickerPosition(sticker: Sticker, x: Float, y: Float) {
-        sticker.matrix.postTranslate(x, y)
+    private fun setStickerPosition(sticker: Sticker) {
+        sticker.matrix.postTranslate(sticker.x, sticker.y)
+        sticker.matrix.postRotate(sticker.angle)
     }
 
     private fun removeSticker(sticker: Sticker?) {
+        LogUtil.theNv("$sticker")
         if (sticker == null)
             return
+        stickers.remove(sticker)
         currentSticker = null
-        this.visibility = View.GONE
+//        this.visibility = View.GONE
+        invalidate()
         stickerViewListener.onRemove()
     }
 
@@ -505,7 +482,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     fun done() {
-        doneSticker(currentSticker)
+//        doneSticker(currentSticker)
     }
 
     fun zoomAndRotate(event: MotionEvent) {
@@ -517,6 +494,6 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     companion object {
-        private const val PADDING_VERTICAL = 40f
+        private const val PADDING_VERTICAL = 0f
     }
 }

@@ -9,8 +9,8 @@ import com.outsbook.libs.canvaseditor.listeners.StickerIconListener
 
 internal class StickerIcon(drawable: Drawable?, gravity: Int): DrawableSticker(drawable!!), StickerIconListener {
     var iconRadius = ConstantStickerIcon.DEFAULT_ICON_RADIUS
-    var x = 0f
-    var y = 0f
+    override var x = 0f
+    override var y = 0f
 
     var position = ConstantStickerIcon.LEFT_TOP
     var iconListener: StickerIconListener? = null

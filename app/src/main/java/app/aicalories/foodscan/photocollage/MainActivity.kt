@@ -15,8 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import app.aicalories.foodscan.photocollage.databinding.ActivityMainBinding
 import com.google.gson.Gson
 import com.outsbook.libs.canvaseditor.listeners.CanvasEditorListener
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.outsbook.libs.canvaseditor.stickers.DrawableSticker
 
 
 class MainActivity : AppCompatActivity() {
@@ -166,14 +165,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getDiyConfig() {
-        lifecycleScope.launch {
-            delay(200)
+        binding.canvasEditor.post {
             val jsonString = assets.open("data17.json").bufferedReader().use { it.readText() }
             val template = Gson().fromJson(jsonString, DiyConfig::class.java)
             val ratio = binding.canvasEditor.width.toFloat() / 1080
-            template.elements.forEach {
+            val stickers = template.elements.mapNotNull {
                 if (it.type == "Image") {
-                    delay(100)
                     val drawable = GradientDrawable()
                     drawable.shape = GradientDrawable.RECTANGLE
                     drawable.setColor(Color.GRAY)
@@ -181,9 +178,17 @@ class MainActivity : AppCompatActivity() {
                     val heightPx = (it.height*ratio).toInt()
 
                     drawable.setSize(widthPx, heightPx)
-                    binding.canvasEditor.addDrawableSticker(drawable, it.x.toFloat()*ratio, it.y.toFloat()*ratio)
+                    DrawableSticker(
+                        drawable,
+                        it.x.toFloat() * ratio,
+                        it.y.toFloat() * ratio,
+                        it.angle
+                    )
+                } else {
+                    null
                 }
             }
+            binding.canvasEditor.addDrawableStickers(stickers)
         }
     }
 }

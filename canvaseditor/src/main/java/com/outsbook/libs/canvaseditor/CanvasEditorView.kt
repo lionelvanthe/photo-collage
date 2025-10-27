@@ -23,6 +23,7 @@ import com.outsbook.libs.canvaseditor.models.DrawObject
 import com.outsbook.libs.canvaseditor.paints.PaintView
 import com.outsbook.libs.canvaseditor.stickers.BitmapSticker
 import com.outsbook.libs.canvaseditor.stickers.DrawableSticker
+import com.outsbook.libs.canvaseditor.stickers.Sticker
 import com.outsbook.libs.canvaseditor.stickers.StickerView
 import com.outsbook.libs.canvaseditor.stickers.TextSticker
 
@@ -148,11 +149,16 @@ class CanvasEditorView : RelativeLayout{
     fun addDrawableSticker(drawable: Drawable, x: Float, y: Float) {
         doneStickerEdit()
         mStickerView.visibility = View.VISIBLE
-        val sticker = DrawableSticker(drawable)
-        mStickerView.addSticker(sticker, x, y)
+        val sticker = DrawableSticker(drawable, x, y)
+        mStickerView.addSticker(sticker)
         mListener?.onEnableUndo(true)
         mListener?.onEnableRedo(false)
         mListener?.onStickerActive()
+    }
+
+    fun addDrawableStickers(stickers: List<Sticker>) {
+        mStickerView.visibility = View.VISIBLE
+        mStickerView.addStickers(stickers)
     }
 
     fun addBitmapSticker(bitmap: Bitmap) {
@@ -305,7 +311,6 @@ class CanvasEditorView : RelativeLayout{
         mUndoList.forEach {
             drawObject(it)
         }
-        LogUtil.theNv("vo day")
         mRedoList.clear()
         mListener?.onEnableUndo(true)
         mListener?.onEnableRedo(mRedoList.isNotEmpty())

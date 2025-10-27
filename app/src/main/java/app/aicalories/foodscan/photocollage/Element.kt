@@ -7,5 +7,6 @@ data class Element(
     val type: String,
     val width: Int,
     val x: Int,
-    val y: Int
+    val y: Int,
+    val angle: Float
 )

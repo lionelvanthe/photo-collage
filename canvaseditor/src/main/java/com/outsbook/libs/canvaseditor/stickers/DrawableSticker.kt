@@ -5,7 +5,12 @@ import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import com.outsbook.libs.canvaseditor.LogUtil
 
-internal open class DrawableSticker(override var drawable: Drawable): Sticker() {
+open class DrawableSticker(
+    override var drawable: Drawable,
+    override val x: Float = 0f,
+    override val y: Float = 0f,
+    override val angle: Float = 0f
+): Sticker() {
     private val realBounds: Rect
 
     final override val width: Int
