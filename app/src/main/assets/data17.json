@@ -1,0 +1,236 @@
+{
+  "width": 1080,
+  "height": 2340,
+  "background": "#FFFFFF",
+  "elements": [
+    {
+      "type": "Picture",
+      "x": 0,
+      "y": 0,
+      "width": 1080,
+      "height": 2340,
+      "layoutIndex": 0,
+      "srcName": "pic_0.png"
+    },
+    {
+      "type": "Image",
+      "x": 240,
+      "y": 1000,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 1,
+      "srcName": "img_14.png"
+    },
+    {
+      "type": "Image",
+      "x": 361,
+      "y": 1000,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 2,
+      "srcName": "img_15.png"
+    },
+    {
+      "type": "Image",
+      "x": 607,
+      "y": 1000,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 3,
+      "srcName": "img_22.png"
+    },
+    {
+      "type": "Image",
+      "x": 728,
+      "y": 1000,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 4,
+      "srcName": "img_4.png"
+    },
+    {
+      "type": "Image",
+      "x": 118,
+      "y": 1123,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 5,
+      "srcName": "img_21.png"
+    },
+    {
+      "type": "Image",
+      "x": 240,
+      "y": 1123,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 6,
+      "srcName": "img_13.png"
+    },
+    {
+      "type": "Image",
+      "x": 361,
+      "y": 1123,
+      "width": 354,
+      "height": 232,
+      "angle": 0,
+      "layoutIndex": 7,
+      "srcName": "img_16.png"
+    },
+    {
+      "type": "Image",
+      "x": 728,
+      "y": 1123,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 8,
+      "srcName": "img_3.png"
+    },
+    {
+      "type": "Image",
+      "x": 849,
+      "y": 1123,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 9,
+      "srcName": "img_10.png"
+    },
+    {
+      "type": "Image",
+      "x": 118,
+      "y": 1244,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 10,
+      "srcName": "img_20.png"
+    },
+    {
+      "type": "Image",
+      "x": 240,
+      "y": 1244,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 11,
+      "srcName": "img_12.png"
+    },
+    {
+      "type": "Image",
+      "x": 728,
+      "y": 1244,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 12,
+      "srcName": "img_2.png"
+    },
+    {
+      "type": "Image",
+      "x": 849,
+      "y": 1244,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 13,
+      "srcName": "img_9.png"
+    },
+    {
+      "type": "Image",
+      "x": 240,
+      "y": 1366,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 14,
+      "srcName": "img_11.png"
+    },
+    {
+      "type": "Image",
+      "x": 361,
+      "y": 1366,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 15,
+      "srcName": "img_8.png"
+    },
+    {
+      "type": "Image",
+      "x": 484,
+      "y": 1366,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 16,
+      "srcName": "img_19.png"
+    },
+    {
+      "type": "Image",
+      "x": 606,
+      "y": 1366,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 17,
+      "srcName": "img_6.png"
+    },
+    {
+      "type": "Image",
+      "x": 728,
+      "y": 1366,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 18,
+      "srcName": "img_1.png"
+    },
+    {
+      "type": "Image",
+      "x": 361,
+      "y": 1488,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 19,
+      "srcName": "img_7.png"
+    },
+    {
+      "type": "Image",
+      "x": 484,
+      "y": 1488,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 20,
+      "srcName": "img_18.png"
+    },
+    {
+      "type": "Image",
+      "x": 606,
+      "y": 1488,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 21,
+      "srcName": "img_5.png"
+    },
+    {
+      "type": "Image",
+      "x": 484,
+      "y": 1610,
+      "width": 110,
+      "height": 110,
+      "angle": 0,
+      "layoutIndex": 22,
+      "srcName": "img_17.png"
+    }
+  ]
+}

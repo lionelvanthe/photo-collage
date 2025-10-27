@@ -3,6 +3,7 @@ package com.outsbook.libs.canvaseditor.stickers
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import com.outsbook.libs.canvaseditor.LogUtil
 
 internal open class DrawableSticker(override var drawable: Drawable): Sticker() {
     private val realBounds: Rect

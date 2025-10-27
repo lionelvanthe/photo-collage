@@ -1,5 +1,7 @@
 package app.aicalories.foodscan.photocollage
 
+import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -8,9 +10,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.postDelayed
+import androidx.lifecycle.lifecycleScope
 import app.aicalories.foodscan.photocollage.databinding.ActivityMainBinding
 import com.google.gson.Gson
 import com.outsbook.libs.canvaseditor.listeners.CanvasEditorListener
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         initValue()
         initClickListener()
         initCanvasEditorListener()
+        getDiyConfig()
     }
 
     private fun initValue(){
@@ -158,7 +166,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getDiyConfig() {
-        val jsonString = assets.open("template.json").bufferedReader().use { it.readText() }
-        val template = Gson().fromJson(jsonString, DiyConfig::class.java)
+        lifecycleScope.launch {
+            delay(200)
+            val jsonString = assets.open("data17.json").bufferedReader().use { it.readText() }
+            val template = Gson().fromJson(jsonString, DiyConfig::class.java)
+            val ratio = binding.canvasEditor.width.toFloat() / 1080
+            template.elements.forEach {
+                if (it.type == "Image") {
+                    delay(100)
+                    val drawable = GradientDrawable()
+                    drawable.shape = GradientDrawable.RECTANGLE
+                    drawable.setColor(Color.GRAY)
+                    val widthPx = (it.width*ratio).toInt()
+                    val heightPx = (it.height*ratio).toInt()
+
+                    drawable.setSize(widthPx, heightPx)
+                    binding.canvasEditor.addDrawableSticker(drawable, it.x.toFloat()*ratio, it.y.toFloat()*ratio)
+                }
+            }
+        }
     }
 }

@@ -9,6 +9,7 @@ import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import com.outsbook.libs.canvaseditor.LogUtil
 import com.outsbook.libs.canvaseditor.R
 import com.outsbook.libs.canvaseditor.constants.ActionMode
 import com.outsbook.libs.canvaseditor.constants.ConstantSticker
@@ -202,7 +203,16 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             return
         }
         sticker.getBoundPoints(bounds)
-        sticker.getMappedPoints(dst, bounds)
+        val points = FloatArray(8)
+        points[0] = bounds[0]
+        points[1] = bounds[1] - PADDING_VERTICAL
+        points[2] = bounds[2]
+        points[3] = bounds[3] - PADDING_VERTICAL
+        points[4] = bounds[4]
+        points[5] = bounds[5] + PADDING_VERTICAL
+        points[6] = bounds[6]
+        points[7] = bounds[7] + PADDING_VERTICAL
+        sticker.getMappedPoints(dst, points)
     }
 
     private fun calculateDistance(event: MotionEvent?): Float {
@@ -416,6 +426,38 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         sticker.matrix.postTranslate(offsetX, offsetY)
     }
 
+
+    fun addSticker(sticker: Sticker, x: Float, y: Float): StickerView {
+        if (ViewCompat.isLaidOut(this)) {
+            addStickerImmediately(sticker, x, y)
+        } else {
+            post { addStickerImmediately(sticker, x, y) }
+        }
+        return this
+    }
+
+    private fun addStickerImmediately(sticker: Sticker, x: Float, y: Float) {
+        setStickerPosition(sticker, x, y)
+//        val scaleFactor: Float
+//        val widthScaleFactor: Float = width.toFloat() / sticker.drawable.intrinsicWidth
+//        val heightScaleFactor: Float = height.toFloat() / sticker.drawable.intrinsicHeight
+//        scaleFactor =
+//            if (widthScaleFactor > heightScaleFactor) heightScaleFactor else widthScaleFactor
+//        sticker.matrix.postScale(
+//            scaleFactor / 2,
+//            scaleFactor / 2,
+//            width / 2.toFloat(),
+//            height / 2.toFloat()
+//        )
+        currentSticker = sticker
+//        stickers.add(sticker)
+        invalidate()
+    }
+
+    private fun setStickerPosition(sticker: Sticker, x: Float, y: Float) {
+        sticker.matrix.postTranslate(x, y)
+    }
+
     private fun removeSticker(sticker: Sticker?) {
         if (sticker == null)
             return
@@ -472,5 +514,9 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     fun flip() {
         flipSticker(currentSticker)
+    }
+
+    companion object {
+        private const val PADDING_VERTICAL = 40f
     }
 }

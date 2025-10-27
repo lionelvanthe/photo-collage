@@ -112,7 +112,7 @@ class CanvasEditorView : RelativeLayout{
             )
         )
         addView(mStickerView)
-        mStickerView.visibility = View.GONE
+//        mStickerView.visibility = View.GONE
     }
 
     fun setListener(listener: CanvasEditorListener) {
@@ -140,6 +140,16 @@ class CanvasEditorView : RelativeLayout{
         mStickerView.visibility = View.VISIBLE
         val sticker = DrawableSticker(drawable)
         mStickerView.addSticker(sticker)
+        mListener?.onEnableUndo(true)
+        mListener?.onEnableRedo(false)
+        mListener?.onStickerActive()
+    }
+
+    fun addDrawableSticker(drawable: Drawable, x: Float, y: Float) {
+        doneStickerEdit()
+        mStickerView.visibility = View.VISIBLE
+        val sticker = DrawableSticker(drawable)
+        mStickerView.addSticker(sticker, x, y)
         mListener?.onEnableUndo(true)
         mListener?.onEnableRedo(false)
         mListener?.onStickerActive()
@@ -295,6 +305,7 @@ class CanvasEditorView : RelativeLayout{
         mUndoList.forEach {
             drawObject(it)
         }
+        LogUtil.theNv("vo day")
         mRedoList.clear()
         mListener?.onEnableUndo(true)
         mListener?.onEnableRedo(mRedoList.isNotEmpty())
