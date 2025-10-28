@@ -7,7 +7,9 @@ import android.view.MotionEvent
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import app.aicalories.foodscan.photocollage.databinding.ActivityMainBinding
@@ -166,7 +168,14 @@ class MainActivity : AppCompatActivity() {
         binding.canvasEditor.post {
             val jsonString = assets.open("data.json").bufferedReader().use { it.readText() }
             val template = Gson().fromJson(jsonString, DiyConfig::class.java)
-            val ratio = binding.canvasEditor.width.toFloat() / 1080
+
+            val layoutParams = binding.canvasEditor.layoutParams as ConstraintLayout.LayoutParams
+            layoutParams.dimensionRatio = "${template.width}:${template.height}"
+            binding.canvasEditor.layoutParams = layoutParams
+
+            binding.canvasEditor.setBackgroundColor(template.background.toColorInt())
+
+            val ratio = binding.canvasEditor.height.toFloat() / template.height
             val stickers = template.elements.mapNotNull {
                 if (it.type == "Image") {
                     val drawable = GradientDrawable()
