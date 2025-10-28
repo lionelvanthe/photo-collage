@@ -1,9 +1,9 @@
 package com.outsbook.libs.canvaseditor.stickers
 
 import android.graphics.Canvas
+import android.graphics.Path
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
-import com.outsbook.libs.canvaseditor.LogUtil
 
 open class DrawableSticker(
     override var drawable: Drawable,
@@ -30,10 +30,20 @@ open class DrawableSticker(
 
     override fun draw(canvas: Canvas) {
         canvas.save()
+        clip(canvas)
         canvas.concat(matrix)
         drawable.bounds = realBounds
         drawable.draw(canvas)
         canvas.restore()
+    }
+
+    protected open fun clip(canvas: Canvas) {
+        val clipPath = Path().apply {
+            addRect(0f, 0f, width.toFloat(), height.toFloat(), Path.Direction.CW)
+            transform(matrixToClip)
+        }
+        canvas.clipPath(clipPath)
+
     }
 
     override fun setAlpha(alpha: Int): DrawableSticker {

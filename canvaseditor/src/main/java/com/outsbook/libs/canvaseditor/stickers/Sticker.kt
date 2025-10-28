@@ -12,6 +12,7 @@ import kotlin.math.sqrt
 
 abstract class Sticker {
     val matrix = Matrix()
+    var matrixToClip = Matrix()
     var isFlippedHorizontally = false
     var isFlippedVertically = false
 

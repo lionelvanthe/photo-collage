@@ -24,6 +24,9 @@ internal class StickerIcon(drawable: Drawable?, gravity: Int): DrawableSticker(d
         super.draw(canvas)
     }
 
+    override fun clip(canvas: Canvas) {
+    }
+
     override fun onActionDown(stickerView: StickerView?, event: MotionEvent?) {
         iconListener?.onActionDown(stickerView, event)
     }

@@ -10,8 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.postDelayed
-import androidx.lifecycle.lifecycleScope
 import app.aicalories.foodscan.photocollage.databinding.ActivityMainBinding
 import com.google.gson.Gson
 import com.outsbook.libs.canvaseditor.listeners.CanvasEditorListener
@@ -166,7 +164,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getDiyConfig() {
         binding.canvasEditor.post {
-            val jsonString = assets.open("data17.json").bufferedReader().use { it.readText() }
+            val jsonString = assets.open("data.json").bufferedReader().use { it.readText() }
             val template = Gson().fromJson(jsonString, DiyConfig::class.java)
             val ratio = binding.canvasEditor.width.toFloat() / 1080
             val stickers = template.elements.mapNotNull {

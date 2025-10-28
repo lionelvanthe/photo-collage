@@ -429,11 +429,12 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     private fun setStickerPosition(sticker: Sticker) {
         sticker.matrix.postTranslate(sticker.x, sticker.y)
-        sticker.matrix.postRotate(sticker.angle)
+        sticker.getMappedCenterPoint(midPoint, point, tmp)
+        sticker.matrix.postRotate(sticker.angle, midPoint.x, midPoint.y)
+        sticker.matrixToClip = Matrix(sticker.matrix)
     }
 
     private fun removeSticker(sticker: Sticker?) {
-        LogUtil.theNv("$sticker")
         if (sticker == null)
             return
         stickers.remove(sticker)

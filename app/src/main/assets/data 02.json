@@ -1,0 +1,97 @@
+{
+  "width": 1080,
+  "height": 1920,
+  "background": "#FFFFFF",
+  "elements": [
+    {
+      "type": "Picture",
+      "x": 0,
+      "y": 0,
+      "width": 1080,
+      "height": 1920,
+      "layoutIndex": 0,
+      "srcName": "pic_0.png"
+    },
+    {
+      "type": "Picture",
+      "x": 64,
+      "y": 541,
+      "width": 950,
+      "height": 601,
+      "layoutIndex": 1,
+      "srcName": "pic_2.png"
+    },
+    {
+      "type": "Image",
+      "x": 64,
+      "y": 541,
+      "width": 950,
+      "height": 601,
+      "angle": 0,
+      "layoutIndex": 2,
+      "srcName": "img_2.png"
+    },
+    {
+      "type": "Picture",
+      "x": 64,
+      "y": 899,
+      "width": 950,
+      "height": 597,
+      "layoutIndex": 3,
+      "srcName": "pic_3.png"
+    },
+    {
+      "type": "Image",
+      "x": 64,
+      "y": 899,
+      "width": 950,
+      "height": 597,
+      "angle": 0,
+      "layoutIndex": 4,
+      "srcName": "img_3.png"
+    },
+    {
+      "type": "Picture",
+      "x": 64,
+      "y": 1428,
+      "width": 950,
+      "height": 492,
+      "layoutIndex": 5,
+      "srcName": "pic_4.png"
+    },
+    {
+      "type": "Image",
+      "x": 64,
+      "y": 1428,
+      "width": 950,
+      "height": 492,
+      "angle": 0,
+      "layoutIndex": 6,
+      "srcName": "img_4.png"
+    },
+    {
+      "type": "Image",
+      "x": 532,
+      "y": 464,
+      "width": 548,
+      "height": 1456,
+      "angle": 0,
+      "layoutIndex": 7,
+      "srcName": "img_1.png"
+    }
+  ],
+  "masks": [
+    {
+      "srcName": "mask_2.png",
+      "dstName": "img_2.png"
+    },
+    {
+      "srcName": "mask_3.png",
+      "dstName": "img_3.png"
+    },
+    {
+      "srcName": "mask_4.png",
+      "dstName": "img_4.png"
+    }
+  ]
+}

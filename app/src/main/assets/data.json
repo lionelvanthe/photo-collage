@@ -1,0 +1,147 @@
+{
+  "width": 1080,
+  "height": 1920,
+  "background": "#FFFFFF",
+  "elements": [
+    {
+      "type": "Picture",
+      "x": 0,
+      "y": 0,
+      "width": 1080,
+      "height": 1920,
+      "layoutIndex": 0,
+      "srcName": "pic_0.png"
+    },
+    {
+      "type": "Image",
+      "x": 575,
+      "y": 750,
+      "width": 300,
+      "height": 300,
+      "angle": 16,
+      "layoutIndex": 1,
+      "srcName": "img_2.png"
+    },
+    {
+      "type": "Picture",
+      "x": 509,
+      "y": 699,
+      "width": 422,
+      "height": 460,
+      "layoutIndex": 2,
+      "srcName": "pic_2.png"
+    },
+    {
+      "type": "Image",
+      "x": 209,
+      "y": 672,
+      "width": 300,
+      "height": 300,
+      "angle": -16,
+      "layoutIndex": 3,
+      "srcName": "img_1.png"
+    },
+    {
+      "type": "Picture",
+      "x": 158,
+      "y": 619,
+      "width": 422,
+      "height": 460,
+      "layoutIndex": 4,
+      "srcName": "pic_1.png"
+    },
+    {
+      "type": "Image",
+      "x": 134,
+      "y": 1072,
+      "width": 300,
+      "height": 300,
+      "angle": 0,
+      "layoutIndex": 5,
+      "srcName": "img_5.png"
+    },
+    {
+      "type": "Picture",
+      "x": 120,
+      "y": 1057,
+      "width": 328,
+      "height": 385,
+      "layoutIndex": 6,
+      "srcName": "pic_5.png"
+    },
+    {
+      "type": "Image",
+      "x": 393,
+      "y": 1322,
+      "width": 300,
+      "height": 300,
+      "angle": 8,
+      "layoutIndex": 7,
+      "srcName": "img_4.png"
+    },
+    {
+      "type": "Picture",
+      "x": 350,
+      "y": 1288,
+      "width": 379,
+      "height": 427,
+      "layoutIndex": 8,
+      "srcName": "pic_4.png"
+    },
+    {
+      "type": "Image",
+      "x": 627,
+      "y": 1102,
+      "width": 300,
+      "height": 300,
+      "angle": -8,
+      "layoutIndex": 9,
+      "srcName": "img_3.png"
+    },
+    {
+      "type": "Picture",
+      "x": 592,
+      "y": 1068,
+      "width": 379,
+      "height": 427,
+      "layoutIndex": 10,
+      "srcName": "pic_3.png"
+    },
+    {
+      "type": "Picture",
+      "x": 727,
+      "y": 497,
+      "width": 223,
+      "height": 257,
+      "layoutIndex": 11,
+      "srcName": "pic_6.png"
+    },
+    {
+      "type": "Picture",
+      "x": 606,
+      "y": 1338,
+      "width": 459,
+      "height": 449,
+      "layoutIndex": 12,
+      "srcName": "pic_7.png"
+    },
+    {
+      "type": "Picture",
+      "x": 117,
+      "y": 1422,
+      "width": 225,
+      "height": 284,
+      "layoutIndex": 13,
+      "srcName": "pic_8.png"
+    },
+    {
+      "type": "Picture",
+      "x": 69,
+      "y": 447,
+      "width": 940,
+      "height": 1406,
+      "layoutIndex": 14,
+      "srcName": "pic_9.png"
+    }
+  ]
+}
