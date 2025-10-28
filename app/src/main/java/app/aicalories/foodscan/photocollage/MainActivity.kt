@@ -60,6 +60,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        binding.ivDonePaint.setOnClickListener {
+            binding.canvasEditor.donePaint()
+//            binding.viewBrush.visibility = View.GONE
+        }
+
         binding.buttonText.setOnClickListener{
             //Add text sticker
             val text = "Canvas"
@@ -82,6 +87,8 @@ class MainActivity : AppCompatActivity() {
             binding.buttonMinus.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_minus_black_24dp))
             val color = ContextCompat.getColor(this, R.color.colorBlack)
             binding.canvasEditor.setPaintColor(color)
+            binding.canvasEditor.enablePaintView()
+//            binding.viewBrush.visibility = View.VISIBLE
         }
 
         binding.buttonYellow.setOnClickListener {

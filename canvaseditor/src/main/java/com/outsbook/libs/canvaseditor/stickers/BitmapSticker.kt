@@ -7,7 +7,12 @@ import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 
-internal class BitmapSticker(context: Context, bitmap: Bitmap): Sticker() {
+internal class BitmapSticker(
+    context: Context,
+    bitmap: Bitmap,
+    override val x: Float = 0f,
+    override val y: Float = 0f
+) : Sticker() {
     private val realBounds: Rect
 
     override var drawable: Drawable = BitmapDrawable(context.resources, bitmap)

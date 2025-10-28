@@ -48,7 +48,7 @@ internal class PaintView (context: Context, private val paintViewListener: Paint
     fun initCanvas() {
         extraBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         extraCanvas = Canvas(extraBitmap)
-        extraCanvas.drawColor(ContextCompat.getColor(context, android.R.color.white))
+        extraCanvas.drawColor(ContextCompat.getColor(context, android.R.color.transparent))
         invalidate()
     }
 

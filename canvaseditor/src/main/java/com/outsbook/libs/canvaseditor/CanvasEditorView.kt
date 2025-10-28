@@ -3,7 +3,9 @@ package com.outsbook.libs.canvaseditor
 import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -20,12 +22,15 @@ import com.outsbook.libs.canvaseditor.listeners.PaintViewListener
 import com.outsbook.libs.canvaseditor.listeners.CanvasEditorListener
 import com.outsbook.libs.canvaseditor.listeners.StickerViewListener
 import com.outsbook.libs.canvaseditor.models.DrawObject
+import com.outsbook.libs.canvaseditor.models.PathAndPaint
 import com.outsbook.libs.canvaseditor.paints.PaintView
 import com.outsbook.libs.canvaseditor.stickers.BitmapSticker
 import com.outsbook.libs.canvaseditor.stickers.DrawableSticker
 import com.outsbook.libs.canvaseditor.stickers.Sticker
 import com.outsbook.libs.canvaseditor.stickers.StickerView
 import com.outsbook.libs.canvaseditor.stickers.TextSticker
+import kotlin.math.ceil
+import androidx.core.graphics.createBitmap
 
 class CanvasEditorView : RelativeLayout{
     @JvmOverloads
@@ -45,9 +50,13 @@ class CanvasEditorView : RelativeLayout{
 
     private val mUndoList = mutableListOf<DrawObject>()
     private val mRedoList = mutableListOf<DrawObject>()
+    private val listPathAndPaint = mutableListOf<PathAndPaint>()
 
     private val paintViewListener = object : PaintViewListener {
         override fun onTouchUp(obj: DrawObject) {
+            obj.pathAndPaint?.let {
+                listPathAndPaint.add(it)
+            }
             mUndoList.add(obj)
             mRedoList.clear()
             mListener?.onEnableUndo(true)
@@ -101,10 +110,6 @@ class CanvasEditorView : RelativeLayout{
         val params = LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
         )
-        mPaintView.layoutParams = params
-        mPaintView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white))
-        addView(mPaintView)
-
         mStickerView.layoutParams = params
         mStickerView.setBackgroundColor(
             ContextCompat.getColor(
@@ -113,7 +118,12 @@ class CanvasEditorView : RelativeLayout{
             )
         )
         addView(mStickerView)
-//        mStickerView.visibility = View.GONE
+
+        mPaintView.layoutParams = params
+        mPaintView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+        addView(mPaintView)
+
+        mPaintView.visibility = View.GONE
     }
 
     fun setListener(listener: CanvasEditorListener) {
@@ -171,6 +181,16 @@ class CanvasEditorView : RelativeLayout{
         mListener?.onStickerActive()
     }
 
+    fun addBitmapSticker(bitmap: Bitmap, x: Float, y: Float) {
+        doneStickerEdit()
+        mStickerView.visibility = View.VISIBLE
+        val sticker = BitmapSticker(context, bitmap, x, y)
+        mStickerView.addSticker(sticker)
+        mListener?.onEnableUndo(true)
+        mListener?.onEnableRedo(false)
+        mListener?.onStickerActive()
+    }
+
     fun addTextSticker(text: String, textColor: Int, typeface: Typeface?) {
         doneStickerEdit()
         mStickerView.visibility = View.VISIBLE
@@ -207,6 +227,48 @@ class CanvasEditorView : RelativeLayout{
         mListener?.onEnableUndo(true)
         mListener?.onEnableRedo(false)
         mListener?.onStickerActive()
+    }
+
+    fun enablePaintView() {
+        mPaintView.visibility = View.VISIBLE
+    }
+
+    fun donePaint() {
+        mPaintView.visibility = View.GONE
+
+        val totalBounds = RectF()
+        val temp = RectF()
+        var first = true
+
+        for (p in listPathAndPaint) {
+            p.path.computeBounds(temp, true)
+            if (first) {
+                totalBounds.set(temp)
+                first = false
+            } else {
+                totalBounds.union(temp)
+            }
+        }
+
+        val maxStroke = listPathAndPaint.maxOfOrNull { it.paint.strokeWidth } ?: 0f
+        val padding = maxStroke / 2f + 2f
+        totalBounds.inset(-padding, -padding)
+
+        val width = ceil(totalBounds.width()).toInt()
+        val height = ceil(totalBounds.height()).toInt()
+
+        val bitmap = createBitmap(width, height)
+
+        val canvas = Canvas(bitmap)
+
+        canvas.translate(-totalBounds.left, -totalBounds.top)
+
+        listPathAndPaint.forEach {
+            canvas.drawPath(it.path, it.paint)
+        }
+        listPathAndPaint.clear()
+        mPaintView.initCanvas()
+        addBitmapSticker(bitmap, totalBounds.left, totalBounds.top)
     }
 
     fun doneActiveSticker(){

@@ -20,6 +20,18 @@
         android:background="@color/white"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/ivDonePaint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_tick"
+        android:translationZ="12dp"
+        android:padding="6dp"
+        android:layout_marginEnd="12dp"
+        app:layout_constraintTop_toTopOf="@id/viewTop"
+        app:layout_constraintBottom_toBottomOf="@id/viewTop"
+        app:layout_constraintEnd_toEndOf="@id/viewTop"/>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -82,7 +94,7 @@
         android:orientation="horizontal"
         android:layout_alignParentBottom="true"
         android:weightSum="8"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/viewBrush"
         android:background="@color/colorPrimary">
         <ImageButton
             android:id="@+id/buttonSticker"
@@ -157,6 +169,14 @@
             android:contentDescription="@string/app_name"
             android:background="@android:color/transparent" />
     </LinearLayout>
+
+    <View
+        android:id="@+id/viewBrush"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:background="@color/white"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
     <RelativeLayout
         android:id="@+id/viewImagePreview"
