@@ -4,6 +4,7 @@ import android.annotation.TargetApi
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
@@ -236,6 +237,9 @@ class CanvasEditorView : RelativeLayout{
 
     fun donePaint() {
         mPaintView.visibility = View.GONE
+        val scale = 1/mStickerView.getMScaleY()
+        val matrix = Matrix()
+        matrix.setScale(scale, scale)
 
         val totalBounds = RectF()
         val temp = RectF()
@@ -243,6 +247,7 @@ class CanvasEditorView : RelativeLayout{
 
         for (p in listPathAndPaint) {
             p.path.computeBounds(temp, true)
+            matrix.mapRect(temp)
             if (first) {
                 totalBounds.set(temp)
                 first = false
@@ -263,6 +268,7 @@ class CanvasEditorView : RelativeLayout{
         val canvas = Canvas(bitmap)
 
         canvas.translate(-totalBounds.left, -totalBounds.top)
+        canvas.scale(scale, scale)
 
         listPathAndPaint.forEach {
             canvas.drawPath(it.path, it.paint)

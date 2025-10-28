@@ -67,6 +67,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
     private var currentIcon: StickerIcon? = null
     private var stickers = mutableListOf<Sticker>()
+    private var mScaleY = 1f
 
     init {
         configDefaultIcons()
@@ -102,9 +103,15 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        currentSticker?.let {
-            transformSticker(it)
+        if (oldh != 0) {
+            mScaleY = h.toFloat()/oldh.toFloat()
         }
+        if (mScaleY > 1) {
+            mScaleY = 1f
+        }
+//        currentSticker?.let {
+//            transformSticker(it)
+//        }
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -119,6 +126,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     override fun dispatchDraw(canvas: Canvas) {
         super.dispatchDraw(canvas)
+        canvas.scale(mScaleY, mScaleY)
         drawStickers(canvas)
     }
 
@@ -538,6 +546,10 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     fun flip() {
         flipSticker(currentSticker)
+    }
+
+    fun getMScaleY(): Float {
+        return mScaleY
     }
 
     companion object {

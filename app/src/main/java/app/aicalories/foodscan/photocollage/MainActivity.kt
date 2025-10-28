@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.ivDonePaint.setOnClickListener {
             binding.canvasEditor.donePaint()
-//            binding.viewBrush.visibility = View.GONE
+            binding.viewBrush.visibility = View.GONE
         }
 
         binding.buttonText.setOnClickListener{
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             val color = ContextCompat.getColor(this, R.color.colorBlack)
             binding.canvasEditor.setPaintColor(color)
             binding.canvasEditor.enablePaintView()
-//            binding.viewBrush.visibility = View.VISIBLE
+            binding.viewBrush.visibility = View.VISIBLE
         }
 
         binding.buttonYellow.setOnClickListener {
