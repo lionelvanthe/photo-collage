@@ -434,6 +434,52 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         sticker.matrixToClip = Matrix(sticker.matrix)
     }
 
+
+    fun addSticker(sticker: Sticker, position: Int): StickerView {
+        if (ViewCompat.isLaidOut(this)) {
+            addStickerImmediately(sticker, position)
+        } else {
+            post { addStickerImmediately(sticker, position) }
+        }
+        return this
+    }
+
+    private fun addStickerImmediately(sticker: Sticker, position: Int) {
+        setStickerPosition(sticker, position)
+        val scaleFactor: Float
+        val widthScaleFactor: Float = width.toFloat() / sticker.drawable.intrinsicWidth
+        val heightScaleFactor: Float = height.toFloat() / sticker.drawable.intrinsicHeight
+        scaleFactor =
+            if (widthScaleFactor > heightScaleFactor) heightScaleFactor else widthScaleFactor
+        sticker.matrix.postScale(
+            scaleFactor / 2,
+            scaleFactor / 2,
+            width / 2.toFloat(),
+            height / 2.toFloat()
+        )
+        currentSticker = sticker
+        stickers.add(sticker)
+        invalidate()
+    }
+
+    private fun setStickerPosition(sticker: Sticker, position: Int) {
+        val width = width.toFloat()
+        val height = height.toFloat()
+        var offsetX = width - sticker.width
+        var offsetY = height - sticker.height
+        when {
+            position and ConstantSticker.TOP > 0 -> offsetY /= 4f
+            position and ConstantSticker.BOTTOM > 0 -> offsetY *= 3f / 4f
+            else -> offsetY /= 2f
+        }
+        when {
+            position and ConstantSticker.LEFT > 0 -> offsetX /= 4f
+            position and ConstantSticker.RIGHT > 0 -> offsetX *= 3f / 4f
+            else -> offsetX /= 2f
+        }
+        sticker.matrix.postTranslate(offsetX, offsetY)
+    }
+
     private fun removeSticker(sticker: Sticker?) {
         if (sticker == null)
             return

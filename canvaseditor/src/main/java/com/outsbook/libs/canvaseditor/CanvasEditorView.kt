@@ -31,6 +31,7 @@ import com.outsbook.libs.canvaseditor.stickers.StickerView
 import com.outsbook.libs.canvaseditor.stickers.TextSticker
 import kotlin.math.ceil
 import androidx.core.graphics.createBitmap
+import com.outsbook.libs.canvaseditor.constants.ConstantSticker
 
 class CanvasEditorView : RelativeLayout{
     @JvmOverloads
@@ -202,7 +203,7 @@ class CanvasEditorView : RelativeLayout{
         }
         sticker.setAlpha(255)
         sticker.resizeText()
-        mStickerView.addSticker(sticker)
+        mStickerView.addSticker(sticker, ConstantSticker.CENTER)
         mListener?.onEnableUndo(true)
         mListener?.onEnableRedo(false)
         mListener?.onStickerActive()
