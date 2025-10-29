@@ -1,8 +1,10 @@
 package app.aicalories.foodscan.photocollage
 
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.os.Environment
 import android.view.MotionEvent
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -13,9 +15,15 @@ import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import app.aicalories.foodscan.photocollage.databinding.ActivityMainBinding
+import com.airbnb.lottie.LottieCompositionFactory
+import com.airbnb.lottie.LottieDrawable
 import com.google.gson.Gson
 import com.outsbook.libs.canvaseditor.listeners.CanvasEditorListener
 import com.outsbook.libs.canvaseditor.stickers.DrawableSticker
+import com.welly.myapplication.lottierecorder.FrameCreator
+import com.welly.myapplication.lottierecorder.Recorder
+import com.welly.myapplication.lottierecorder.RecordingOperation
+import java.io.File
 
 
 class MainActivity : AppCompatActivity() {
@@ -40,6 +48,38 @@ class MainActivity : AppCompatActivity() {
         initClickListener()
         initCanvasEditorListener()
         getDiyConfig()
+
+/*        // 1️⃣ Load composition từ assets
+        val inputStream = this@MainActivity.assets.open("animation.json")
+        val result = LottieCompositionFactory.fromJsonInputStreamSync(inputStream, "animation.json")
+        val composition = result.value ?: throw Exception("Lottie parse failed: ${result.exception}")
+        inputStream.close()
+        // 2️⃣ Tạo drawable render animation
+        val lottieDrawable = LottieDrawable().apply {
+            setComposition(composition)
+            setImageAssetDelegate { asset ->
+                try {
+                    val input = this@MainActivity.assets.open("images/${asset.fileName}")
+                    BitmapFactory.decodeStream(input)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }
+        }
+
+        val path = getExternalFilesDir(Environment.DIRECTORY_PICTURES) ?: File(
+            cacheDir,
+            Environment.DIRECTORY_PICTURES
+        ).apply { mkdirs() }
+        val videoFile = File(path, "lottie_in_video.mp4")
+        val recordingOperation =
+            RecordingOperation(Recorder(videoOutput = videoFile), FrameCreator(lottieDrawable))
+            {
+                //ToDO: convert done
+            }
+
+        recordingOperation.start()  // Make sure to call this on a background thread!*/
     }
 
     private fun initValue(){
