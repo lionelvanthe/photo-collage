@@ -80,6 +80,18 @@ class MainActivity : AppCompatActivity() {
             }
 
         recordingOperation.start()  // Make sure to call this on a background thread!*/
+
+
+//        // 1️⃣ Khai báo thư mục chứa ảnh (phải nằm trong assets/)
+//        binding.lottieAnimationView.setImageAssetsFolder("images")
+//
+//// 2️⃣ Rồi mới load animation
+//        binding.lottieAnimationView.setAnimation("animation.json")
+//
+//// 3️⃣ (Tuỳ chọn) Bắt đầu phát
+//        binding.lottieAnimationView.playAnimation()
+
+
     }
 
     private fun initValue(){
