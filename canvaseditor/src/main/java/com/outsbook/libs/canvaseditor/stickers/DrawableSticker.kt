@@ -1,8 +1,13 @@
 package com.outsbook.libs.canvaseditor.stickers
 
+import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
+import android.graphics.RectF
 import android.graphics.drawable.Drawable
 
 open class DrawableSticker(
@@ -12,6 +17,8 @@ open class DrawableSticker(
     override val angle: Float = 0f
 ): Sticker() {
     private val realBounds: Rect
+
+    var mask: Bitmap? = null
 
     final override val width: Int
         get() = drawable.intrinsicWidth
@@ -23,18 +30,30 @@ open class DrawableSticker(
         realBounds = Rect(0, 0, width, height)
     }
 
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    val xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
+
     override fun setDrawable(drawable: Drawable): DrawableSticker {
         this.drawable = drawable
         return this
     }
 
     override fun draw(canvas: Canvas) {
+        val layerId = canvas.saveLayer(null, null)
         canvas.save()
         clip(canvas)
         canvas.concat(matrix)
         drawable.bounds = realBounds
         drawable.draw(canvas)
         canvas.restore()
+
+        mask?.let {
+            paint.xfermode = xfermode
+            canvas.drawBitmap(it, null,
+                RectF(x, y, x + width, y + height), paint)
+            paint.xfermode = null
+        }
+        canvas.restoreToCount(layerId)
     }
 
     protected open fun clip(canvas: Canvas) {
