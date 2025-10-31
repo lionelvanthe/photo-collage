@@ -33,6 +33,7 @@ import com.outsbook.libs.canvaseditor.stickers.TextSticker
 import kotlin.math.ceil
 import androidx.core.graphics.createBitmap
 import com.outsbook.libs.canvaseditor.constants.ConstantSticker
+import com.outsbook.libs.canvaseditor.followtext.FollowTextView
 
 class CanvasEditorView : RelativeLayout{
     @JvmOverloads
@@ -105,6 +106,7 @@ class CanvasEditorView : RelativeLayout{
     }
 
     private val mPaintView: PaintView = PaintView(context, paintViewListener)
+    private val mFollowTextView: FollowTextView = FollowTextView(context)
     private val mStickerView: StickerView = StickerView(context, stickerViewListener)
     private var mListener: CanvasEditorListener? = null
 
@@ -125,7 +127,12 @@ class CanvasEditorView : RelativeLayout{
         mPaintView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
         addView(mPaintView)
 
+        mFollowTextView.layoutParams = params
+        mFollowTextView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.transparent))
+        addView(mFollowTextView)
+
         mPaintView.visibility = View.GONE
+        mFollowTextView.visibility = View.GONE
     }
 
     fun setListener(listener: CanvasEditorListener) {
@@ -235,6 +242,10 @@ class CanvasEditorView : RelativeLayout{
         mPaintView.visibility = View.VISIBLE
     }
 
+    fun enableFollowTextView() {
+        mFollowTextView.visibility = View.VISIBLE
+    }
+
     fun donePaint() {
         mPaintView.visibility = View.GONE
         val scale = 1/mStickerView.getMScaleY()
@@ -275,6 +286,30 @@ class CanvasEditorView : RelativeLayout{
         }
         listPathAndPaint.clear()
         mPaintView.initCanvas()
+        addBitmapSticker(bitmap, totalBounds.left, totalBounds.top)
+    }
+
+    fun doneTextBrush() {
+        mFollowTextView.visibility = View.GONE
+        val scale = 1/mStickerView.getMScaleY()
+        val matrix = Matrix()
+        matrix.setScale(scale, scale)
+
+        val totalBounds = mFollowTextView.computeBoundsForAllPaths()
+        matrix.mapRect(totalBounds)
+        totalBounds.inset(-20f, -20f)
+
+        val width = ceil(totalBounds.width()).toInt()
+        val height = ceil(totalBounds.height()).toInt()
+
+        val bitmap = createBitmap(width, height)
+
+        val canvas = Canvas(bitmap)
+
+        canvas.translate(-totalBounds.left, -totalBounds.top)
+        canvas.scale(scale, scale)
+        mFollowTextView.drawText(canvas)
+        mFollowTextView.clear()
         addBitmapSticker(bitmap, totalBounds.left, totalBounds.top)
     }
 

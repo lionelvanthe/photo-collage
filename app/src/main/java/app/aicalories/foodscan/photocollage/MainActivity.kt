@@ -148,11 +148,16 @@ class MainActivity : AppCompatActivity() {
             binding.buttonMinus.setImageDrawable(ContextCompat.getDrawable(this, R.drawable.ic_minus_yellow_24dp))
             val color = ContextCompat.getColor(this, R.color.colorYellow)
             binding.canvasEditor.setPaintColor(color)
+            binding.canvasEditor.enableFollowTextView()
+            binding.viewBrush.visibility = View.VISIBLE
         }
 
         binding.buttonPlus.setOnClickListener {
             strokeWidth += 10f
             binding.canvasEditor.setStrokeWidth(strokeWidth)
+            binding.canvasEditor.doneTextBrush()
+            binding.viewBrush.visibility = View.GONE
+
         }
 
         binding.buttonMinus.setOnClickListener {
