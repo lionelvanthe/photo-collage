@@ -1,23 +1,29 @@
 package com.outsbook.libs.canvaseditor.stickers
 
-import android.graphics.Bitmap
 import android.graphics.Canvas
-import android.graphics.Paint
 import android.graphics.Path
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
 import android.graphics.Rect
-import android.graphics.RectF
 import android.graphics.drawable.Drawable
 
-open class PictureDrawableSticker(
+open class PictureSticker(
     override var drawable: Drawable,
     override val x: Float = 0f,
     override val y: Float = 0f,
     override val angle: Float = 0f
-): DrawableSticker(drawable, x, y, angle) {
+): Sticker() {
+    protected val realBounds: Rect
 
-    override fun setDrawable(drawable: Drawable): PictureDrawableSticker {
+    final override val width: Int
+        get() = drawable.intrinsicWidth
+
+    final override val height: Int
+        get() = drawable.intrinsicHeight
+
+    init {
+        realBounds = Rect(0, 0, width, height)
+    }
+
+    override fun setDrawable(drawable: Drawable): PictureSticker {
         this.drawable = drawable
         return this
     }
@@ -30,7 +36,7 @@ open class PictureDrawableSticker(
         canvas.restore()
     }
 
-    override fun setAlpha(alpha: Int): PictureDrawableSticker {
+    override fun setAlpha(alpha: Int): PictureSticker {
         drawable.alpha = alpha
         return this
     }

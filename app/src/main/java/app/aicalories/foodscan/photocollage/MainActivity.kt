@@ -1,6 +1,8 @@
 package app.aicalories.foodscan.photocollage
 
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -18,9 +20,13 @@ import app.aicalories.foodscan.photocollage.databinding.ActivityMainBinding
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.size.Size
 import com.google.gson.Gson
 import com.outsbook.libs.canvaseditor.listeners.CanvasEditorListener
 import com.outsbook.libs.canvaseditor.stickers.DrawableSticker
+import com.outsbook.libs.canvaseditor.stickers.PictureSticker
+import com.outsbook.libs.canvaseditor.stickers.Sticker
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -247,64 +253,99 @@ class MainActivity : AppCompatActivity() {
             binding.canvasEditor.setBackgroundColor(template.background.toColorInt())
 
             val ratio = binding.canvasEditor.height.toFloat() / template.height
-            val urls = template.elements.map {
-                "${BuildConfig.BASE_URL}/main/diy/live/1/${it.srcName}"
-            }
-
             lifecycleScope.launch {
 
-                val stickers = loadDrawablesFromUrls(urls).mapIndexed { index, drawable ->
-                    val it = template.elements[index]
-                    val y = if (it.y.toFloat() < binding.canvasEditor.y) {
-                        it.y.toFloat()
-                    } else {
-                        it.y.toFloat() - binding.canvasEditor.y
-                    }
-                    val x = if (it.x.toFloat() < binding.canvasEditor.x) {
-                        it.x.toFloat()
-                    } else {
-                        it.x.toFloat() - binding.canvasEditor.x
-                    }
-                    DrawableSticker(
-                        drawable,
-                        x,
-                        y,
-                        it.angle
-                    )
-                }
+                val stickers = getStickers(template, ratio)
                 binding.canvasEditor.addDrawableStickers(stickers, ratio)
             }
 
         }
     }
 
-    private suspend fun loadDrawablesFromUrls(urls: List<String>): List<Drawable> =
-        withContext(Dispatchers.IO) {
-            val imageLoader = ImageLoader(this@MainActivity)
-            val requests = urls.map { url ->
+    private suspend fun getStickers(template: DiyConfig, ratio: Float): List<Sticker> =
+        withContext(Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
+            throwable.printStackTrace()
+        }) {
+            val masks = template.masks?.associate {
+                it.dstName to "${BuildConfig.BASE_URL}/main/diy/live/1/${it.srcName}"
+            }?: emptyMap()
+            val requests = template.elements.map { element ->
                 async {
-                    try {
-                        val request = ImageRequest.Builder(this@MainActivity)
-                            .data(url)
-                            .addHeader("authorization", BuildConfig.token)
-                            .allowHardware(false) // cần thiết để lấy Drawable
-                            .build()
-                        val result = imageLoader.execute(request)
-                        (result as? SuccessResult)?.drawable?:run {
-                            val drawable = GradientDrawable()
-                            drawable.shape = GradientDrawable.RECTANGLE
-                            drawable.setColor(Color.GRAY)
-                            drawable
+                    val frame = getDrawableFromUrl("${BuildConfig.BASE_URL}/main/diy/live/1/${element.srcName}")
+                    val mask = if (masks[element.srcName] == null) {
+                        null
+                    } else {
+                        getBitmapFromResultCoil(masks[element.srcName]?:"", Size((element.width*ratio).toInt(),(element.height*ratio).toInt()))
+                    }
+
+                    val y = if (element.y.toFloat() < binding.canvasEditor.y) {
+                        element.y.toFloat()
+                    } else {
+                        element.y.toFloat() - binding.canvasEditor.y
+                    }
+                    val x = if (element.x.toFloat() < binding.canvasEditor.x) {
+                        element.x.toFloat()
+                    } else {
+                        element.x.toFloat() - binding.canvasEditor.x
+                    }
+
+                    when (element.type) {
+                        "Image" -> {
+                            DrawableSticker(
+                                frame,
+                                x,
+                                y,
+                                element.angle
+                            ).apply {
+                                this.mask = mask
+                            }
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        val drawable = GradientDrawable()
-                        drawable.shape = GradientDrawable.RECTANGLE
-                        drawable.setColor(Color.GRAY)
-                        drawable
+                        "Picture" -> {
+                            PictureSticker(
+                                frame,
+                                x,
+                                y,
+                                element.angle
+                            )
+                        }
+                        else -> {
+                            null
+                        }
                     }
                 }
             }
-            requests.awaitAll()
+            requests.awaitAll().filterNotNull()
+
+    }
+
+    private suspend fun loadPhotoFromUrl(url: String, size: Size): SuccessResult? {
+        val imageLoader = ImageLoader(this@MainActivity)
+        return try {
+            val request = ImageRequest.Builder(this@MainActivity)
+                .data(url)
+                .size(size)
+                .addHeader("authorization", BuildConfig.token)
+                .allowHardware(false) // cần thiết để lấy Drawable
+                .build()
+            val result = imageLoader.execute(request)
+            (result as? SuccessResult)
+        } catch (e: Exception) {
+            null
         }
+    }
+
+    private suspend fun getDrawableFromUrl(url: String, size: Size = Size.ORIGINAL): Drawable {
+        return (loadPhotoFromUrl(url, size)?.drawable)?: getDefaultDrawable()
+    }
+
+    private suspend fun getBitmapFromResultCoil(url: String, size: Size = Size.ORIGINAL): Bitmap? {
+        return ((loadPhotoFromUrl(url, size)?.drawable) as? BitmapDrawable)?.bitmap
+    }
+
+    private fun getDefaultDrawable(): Drawable {
+        val drawable = GradientDrawable()
+        drawable.shape = GradientDrawable.RECTANGLE
+        drawable.setColor(Color.GRAY)
+        return drawable
+    }
 }

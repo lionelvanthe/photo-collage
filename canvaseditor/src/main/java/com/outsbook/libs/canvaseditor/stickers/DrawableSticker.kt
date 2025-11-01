@@ -50,7 +50,7 @@ open class DrawableSticker(
         mask?.let {
             paint.xfermode = xfermode
             canvas.drawBitmap(it, null,
-                RectF(x, y, x + width, y + height), paint)
+                RectF(x, y, x + it.width, y + it.height), paint)
             paint.xfermode = null
         }
         canvas.restoreToCount(layerId)

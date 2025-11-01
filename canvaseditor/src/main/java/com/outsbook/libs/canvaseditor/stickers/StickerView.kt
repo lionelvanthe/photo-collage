@@ -9,7 +9,6 @@ import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import com.outsbook.libs.canvaseditor.LogUtil
 import com.outsbook.libs.canvaseditor.R
 import com.outsbook.libs.canvaseditor.constants.ActionMode
 import com.outsbook.libs.canvaseditor.constants.ConstantSticker
@@ -306,7 +305,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             currentIcon = null
         }
         if (currentIcon == null) {
-            val sticker = stickers.filter { it.contains(downX, downY) }
+            /*val sticker = stickers.filter { it.contains(downX, downY) }
                 .maxByOrNull {
                     val bounds = RectF(0f, 0f,
                         it.width.toFloat(),
@@ -314,7 +313,8 @@ internal class StickerView(context: Context, private val stickerViewListener: St
                     )
                     it.matrix.mapRect(bounds)
                     bounds.width() * bounds.height()
-                }
+                }*/
+            val sticker = stickers.findLast { it.contains(downX, downY) && it !is PictureSticker }
             currentSticker = sticker
             isTouchInsideSticker = sticker != null
             invalidate()
@@ -327,7 +327,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
         if (currentIcon != null) {
             currentMode = ActionMode.ICON
-            currentIcon!!.onActionDown(this, event)
+            currentIcon?.onActionDown(this, event)
         }
 
         if (currentSticker != null) {

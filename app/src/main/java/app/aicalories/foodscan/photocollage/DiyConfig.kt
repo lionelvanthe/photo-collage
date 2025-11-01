@@ -5,5 +5,5 @@ data class DiyConfig(
     val height: Int,
     val background: String,
     val elements: List<Element>,
-    val masks: List<Mask>
+    val masks: List<Mask>?
 )
