@@ -9,6 +9,7 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.Drawable
+import android.icu.number.Scale
 import android.os.Build
 import android.util.AttributeSet
 import android.util.Log
@@ -175,9 +176,9 @@ class CanvasEditorView : RelativeLayout{
         mListener?.onStickerActive()
     }
 
-    fun addDrawableStickers(stickers: List<Sticker>) {
+    fun addDrawableStickers(stickers: List<Sticker>, scale: Float) {
         mStickerView.visibility = View.VISIBLE
-        mStickerView.addStickers(stickers)
+        mStickerView.addStickers(stickers, scale)
     }
 
     fun addBitmapSticker(bitmap: Bitmap) {

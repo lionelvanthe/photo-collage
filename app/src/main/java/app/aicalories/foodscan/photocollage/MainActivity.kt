@@ -1,10 +1,9 @@
 package app.aicalories.foodscan.photocollage
 
-import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
-import android.os.Environment
 import android.view.MotionEvent
 import android.view.View
 import androidx.activity.enableEdgeToEdge
@@ -14,16 +13,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import app.aicalories.foodscan.photocollage.databinding.ActivityMainBinding
-import com.airbnb.lottie.LottieCompositionFactory
-import com.airbnb.lottie.LottieDrawable
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
 import com.google.gson.Gson
 import com.outsbook.libs.canvaseditor.listeners.CanvasEditorListener
 import com.outsbook.libs.canvaseditor.stickers.DrawableSticker
-import com.welly.myapplication.lottierecorder.FrameCreator
-import com.welly.myapplication.lottierecorder.Recorder
-import com.welly.myapplication.lottierecorder.RecordingOperation
-import java.io.File
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class MainActivity : AppCompatActivity() {
@@ -229,6 +231,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getDiyConfig() {
+
+        /*template.masks.find { mask -> mask.dstName == it.srcName }?.srcName?.let { srcMask ->
+            "https://raw.githubusercontent.com/hoangnhbralyvn/DW_Resources/main/diy/live/1/${srcMask}"
+        }*/
+
         binding.canvasEditor.post {
             val jsonString = assets.open("data.json").bufferedReader().use { it.readText() }
             val template = Gson().fromJson(jsonString, DiyConfig::class.java)
@@ -240,26 +247,64 @@ class MainActivity : AppCompatActivity() {
             binding.canvasEditor.setBackgroundColor(template.background.toColorInt())
 
             val ratio = binding.canvasEditor.height.toFloat() / template.height
-            val stickers = template.elements.mapNotNull {
-                if (it.type == "Image") {
-                    val drawable = GradientDrawable()
-                    drawable.shape = GradientDrawable.RECTANGLE
-                    drawable.setColor(Color.GRAY)
-                    val widthPx = (it.width*ratio).toInt()
-                    val heightPx = (it.height*ratio).toInt()
+            val urls = template.elements.map {
+                "${BuildConfig.BASE_URL}/main/diy/live/1/${it.srcName}"
+            }
 
-                    drawable.setSize(widthPx, heightPx)
+            lifecycleScope.launch {
+
+                val stickers = loadDrawablesFromUrls(urls).mapIndexed { index, drawable ->
+                    val it = template.elements[index]
+                    val y = if (it.y.toFloat() < binding.canvasEditor.y) {
+                        it.y.toFloat()
+                    } else {
+                        it.y.toFloat() - binding.canvasEditor.y
+                    }
+                    val x = if (it.x.toFloat() < binding.canvasEditor.x) {
+                        it.x.toFloat()
+                    } else {
+                        it.x.toFloat() - binding.canvasEditor.x
+                    }
                     DrawableSticker(
                         drawable,
-                        it.x.toFloat() * ratio,
-                        it.y.toFloat() * ratio,
+                        x,
+                        y,
                         it.angle
                     )
-                } else {
-                    null
                 }
+                binding.canvasEditor.addDrawableStickers(stickers, ratio)
             }
-            binding.canvasEditor.addDrawableStickers(stickers)
+
         }
     }
+
+    private suspend fun loadDrawablesFromUrls(urls: List<String>): List<Drawable> =
+        withContext(Dispatchers.IO) {
+            val imageLoader = ImageLoader(this@MainActivity)
+            val requests = urls.map { url ->
+                async {
+                    try {
+                        val request = ImageRequest.Builder(this@MainActivity)
+                            .data(url)
+                            .addHeader("authorization", BuildConfig.token)
+                            .allowHardware(false) // cần thiết để lấy Drawable
+                            .build()
+                        val result = imageLoader.execute(request)
+                        (result as? SuccessResult)?.drawable?:run {
+                            val drawable = GradientDrawable()
+                            drawable.shape = GradientDrawable.RECTANGLE
+                            drawable.setColor(Color.GRAY)
+                            drawable
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        val drawable = GradientDrawable()
+                        drawable.shape = GradientDrawable.RECTANGLE
+                        drawable.setColor(Color.GRAY)
+                        drawable
+                    }
+                }
+            }
+            requests.awaitAll()
+        }
 }

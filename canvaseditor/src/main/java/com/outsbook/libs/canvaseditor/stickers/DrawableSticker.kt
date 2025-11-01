@@ -16,7 +16,7 @@ open class DrawableSticker(
     override val y: Float = 0f,
     override val angle: Float = 0f
 ): Sticker() {
-    private val realBounds: Rect
+    protected val realBounds: Rect
 
     var mask: Bitmap? = null
 

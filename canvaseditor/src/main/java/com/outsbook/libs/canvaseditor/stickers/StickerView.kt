@@ -418,24 +418,25 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         invalidate()
     }
 
-    fun addStickers(stickers: List<Sticker>): StickerView {
+    fun addStickers(stickers: List<Sticker>, scale: Float): StickerView {
         if (ViewCompat.isLaidOut(this)) {
-            addStickersImmediately(stickers)
+            addStickersImmediately(stickers, scale)
         } else {
-            post { addStickersImmediately(stickers) }
+            post { addStickersImmediately(stickers, scale) }
         }
         return this
     }
 
-    private fun addStickersImmediately(stickers: List<Sticker>) {
+    private fun addStickersImmediately(stickers: List<Sticker>, scale: Float) {
         stickers.forEach {
-            setStickerPosition(it)
+            setStickerPosition(it, scale)
         }
         this.stickers = stickers.toMutableList()
         invalidate()
     }
 
-    private fun setStickerPosition(sticker: Sticker) {
+    private fun setStickerPosition(sticker: Sticker, scale: Float = 1f) {
+        sticker.matrix.postScale(scale, scale)
         sticker.matrix.postTranslate(sticker.x, sticker.y)
         sticker.getMappedCenterPoint(midPoint, point, tmp)
         sticker.matrix.postRotate(sticker.angle, midPoint.x, midPoint.y)
