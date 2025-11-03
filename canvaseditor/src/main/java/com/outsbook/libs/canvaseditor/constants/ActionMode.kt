@@ -6,6 +6,6 @@ internal class ActionMode {
         var DRAG = 1
         var ZOOM_WITH_TWO_FINGER = 2
         var ICON = 3
-        var CLICK = 4
+        var SELECT = 4
     }
 }

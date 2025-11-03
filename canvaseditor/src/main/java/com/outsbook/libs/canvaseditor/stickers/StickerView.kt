@@ -175,8 +175,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         stickers.forEach {
             it.draw(canvas)
         }
-
-        if (currentSticker != null) {
+        if (currentSticker != null && currentMode != ActionMode.NONE) {
             getStickerPoints(currentSticker, bitmapPoints)
             val x1 = bitmapPoints[0]
             val y1 = bitmapPoints[1]
@@ -296,7 +295,6 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     private fun onTouchDown(event: MotionEvent): Boolean {
-        currentMode = ActionMode.DRAG
         downX = event.x
         downY = event.y
         if (currentSticker != null) {
@@ -304,23 +302,8 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         } else {
             currentIcon = null
         }
-        if (currentIcon == null) {
-            /*val sticker = stickers.filter { it.contains(downX, downY) }
-                .maxByOrNull {
-                    val bounds = RectF(0f, 0f,
-                        it.width.toFloat(),
-                        it.height.toFloat()
-                    )
-                    it.matrix.mapRect(bounds)
-                    bounds.width() * bounds.height()
-                }*/
-            val sticker = stickers.findLast { it.contains(downX, downY) && it !is PictureSticker }
-            currentSticker = sticker
-            isTouchInsideSticker = sticker != null
-            invalidate()
-        } else {
-            isTouchInsideSticker = true
-        }
+        isTouchInsideSticker = currentSticker?.contains(event.x, event.y)?: false
+
         midPoint = calculateMidPoint()
         oldDistance = calculateDistance(midPoint.x, midPoint.y, downX, downY)
         oldRotation = calculateRotation(midPoint.x, midPoint.y, downX, downY)
@@ -339,12 +322,17 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     private fun handleCurrentMode(event: MotionEvent) {
         when (currentMode) {
-            ActionMode.NONE, ActionMode.CLICK -> {
+            ActionMode.SELECT -> {
+                val dx = event.x - downX
+                val dy = event.y - downY
+                if ((abs(dx) > touchSlop || abs(dy) > touchSlop)) {
+                    currentMode = ActionMode.DRAG
+                }
             }
             ActionMode.DRAG -> if (currentSticker != null && isTouchInsideSticker) {
                 moveMatrix.set(downMatrix)
                 moveMatrix.postTranslate(event.x - downX, event.y - downY)
-                currentSticker!!.setMatrix(moveMatrix)
+                currentSticker?.setMatrix(moveMatrix)
             }
 
             ActionMode.ZOOM_WITH_TWO_FINGER -> if (currentSticker != null && isTouchInsideSticker) {
@@ -366,17 +354,19 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     private fun onTouchUp(event: MotionEvent) {
         if (currentMode == ActionMode.ICON && currentIcon != null && currentSticker != null) {
-            currentIcon!!.onActionUp(this, event)
-        }
-        if (currentMode == ActionMode.DRAG && abs(event.x - downX) < touchSlop && abs(event.y - downY) < touchSlop && currentSticker != null) {
-            if (!isTouchInsideSticker)
-                stickerViewListener.onClickStickerOutside(event.x, event.y)
-            else {
-                stickerViewListener.onClick()
+            currentIcon?.onActionUp(this, event)
+        } else {
+            val sticker = stickers.findLast { it.contains(event.x, event.y) && it !is PictureSticker }
+            currentSticker = sticker
+            if (currentMode != ActionMode.DRAG) {
+                currentMode = if (currentSticker != null) {
+                    ActionMode.SELECT
+                } else {
+                    ActionMode.NONE
+                }
             }
-            currentMode = ActionMode.CLICK
+            invalidate()
         }
-        currentMode = ActionMode.NONE
     }
 
     private fun calculateMidPoint(event: MotionEvent?): PointF {
