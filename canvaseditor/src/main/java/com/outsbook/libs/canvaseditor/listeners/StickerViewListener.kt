@@ -9,5 +9,6 @@ internal interface StickerViewListener {
     fun onZoomAndRotate()
     fun onFlip()
     fun onClickStickerOutside(x: Float, y: Float)
+    fun onClick()
     fun onTouchEvent(event: MotionEvent)
 }

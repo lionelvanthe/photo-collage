@@ -104,6 +104,10 @@ class CanvasEditorView : RelativeLayout{
         override fun onTouchEvent(event: MotionEvent) {
             mListener?.onTouchEvent(event)
         }
+
+        override fun onClick() {
+            mListener?.onClick()
+        }
     }
 
     private val mPaintView: PaintView = PaintView(context, paintViewListener)
@@ -433,6 +437,16 @@ class CanvasEditorView : RelativeLayout{
     private fun doneStickerEdit() {
         if (mStickerView.visibility == View.VISIBLE) {
             mStickerView.done()
+        }
+    }
+
+    fun getCurrentSticker(): Sticker? {
+        return mStickerView.currentSticker
+    }
+
+    fun invalidateStickerView() {
+        if (mStickerView.visibility == View.VISIBLE) {
+            mStickerView.invalidate()
         }
     }
 }

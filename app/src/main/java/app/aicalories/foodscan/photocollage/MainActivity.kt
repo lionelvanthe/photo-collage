@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -41,6 +43,19 @@ class MainActivity : AppCompatActivity() {
     private val binding: ActivityMainBinding by lazy {
         ActivityMainBinding.inflate(layoutInflater)
     }
+
+    val pickMedia = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        // Callback is invoked after the user selects a media item or closes the
+        // photo picker.
+        uri?.let {
+            val inputStream = this.contentResolver.openInputStream(it)
+            binding.canvasEditor.getCurrentSticker()?.setDrawable(Drawable.createFromStream(inputStream, it.toString()).also {
+                inputStream?.close()
+            }!!)
+            binding.canvasEditor.invalidateStickerView()
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -233,6 +248,10 @@ class MainActivity : AppCompatActivity() {
             override fun onStickerFlip() {
                 //When the active sticker flip
             }
+
+            override fun onClick() {
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
         })
     }
 
@@ -297,6 +316,7 @@ class MainActivity : AppCompatActivity() {
                                 y,
                                 element.angle
                             ).apply {
+                                this.drawablePus = ContextCompat.getDrawable(this@MainActivity, R.drawable.ic_add_photo)
                                 this.mask = mask
                             }
                         }

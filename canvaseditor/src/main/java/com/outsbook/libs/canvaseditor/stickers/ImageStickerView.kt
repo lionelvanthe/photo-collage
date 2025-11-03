@@ -2,33 +2,36 @@ package com.outsbook.libs.canvaseditor.stickers
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Matrix
+import android.graphics.Paint
+import android.graphics.PointF
+import android.graphics.RectF
+import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
-import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.ViewCompat
+import com.outsbook.libs.canvaseditor.LogUtil
 import com.outsbook.libs.canvaseditor.R
 import com.outsbook.libs.canvaseditor.constants.ActionMode
 import com.outsbook.libs.canvaseditor.constants.ConstantSticker
 import com.outsbook.libs.canvaseditor.constants.ConstantStickerIcon
-import com.outsbook.libs.canvaseditor.enums.DrawType
 import com.outsbook.libs.canvaseditor.events.DeleteIconEvent
 import com.outsbook.libs.canvaseditor.events.DoneIconEvent
 import com.outsbook.libs.canvaseditor.events.FlipIconEvent
 import com.outsbook.libs.canvaseditor.events.ZoomIconEvent
-import com.outsbook.libs.canvaseditor.listeners.StickerViewListener
-import com.outsbook.libs.canvaseditor.models.DrawObject
-import java.util.*
+import java.util.ArrayList
+import java.util.Arrays
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-internal class StickerView(context: Context, private val stickerViewListener: StickerViewListener) :
-    FrameLayout(context) {
-    var currentSticker: Sticker? = null
+class ImageStickerView: View {
+
+    private var currentSticker: Sticker? = null
 
     private var currentMode = ActionMode.NONE
 
@@ -67,6 +70,21 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     private var currentIcon: StickerIcon? = null
     private var stickers = mutableListOf<Sticker>()
     private var mScaleY = 1f
+
+    constructor(context: Context?) : super(context)
+    constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    )
+
+    constructor(
+        context: Context?,
+        attrs: AttributeSet?,
+        defStyleAttr: Int,
+        defStyleRes: Int
+    ) : super(context, attrs, defStyleAttr, defStyleRes)
 
     init {
         configDefaultIcons()
@@ -123,60 +141,11 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         }
     }
 
-    override fun dispatchDraw(canvas: Canvas) {
-        super.dispatchDraw(canvas)
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
         canvas.scale(mScaleY, mScaleY)
-        drawStickers(canvas)
-    }
-
-    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
-        when (ev.action) {
-            MotionEvent.ACTION_DOWN -> {
-                downX = ev.x
-                downY = ev.y
-                return findCurrentIconTouched() != null || currentSticker != null
-            }
-        }
-        return super.onInterceptTouchEvent(ev)
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        stickerViewListener.onTouchEvent(event)
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> if (!onTouchDown(event)) {
-                return false
-            }
-            MotionEvent.ACTION_POINTER_DOWN -> {
-                oldDistance = calculateDistance(event)
-                oldRotation = calculateRotation(event)
-                midPoint = calculateMidPoint(event)
-                if (currentSticker != null && isInStickerArea(
-                        currentSticker!!, event.getX(1),
-                        event.getY(1)
-                    ) && findCurrentIconTouched() == null
-                ) {
-                    currentMode = ActionMode.ZOOM_WITH_TWO_FINGER
-                }
-            }
-            MotionEvent.ACTION_MOVE -> {
-                handleCurrentMode(event)
-                invalidate()
-            }
-            MotionEvent.ACTION_UP -> onTouchUp(event)
-            MotionEvent.ACTION_POINTER_UP -> {
-                currentMode = ActionMode.NONE
-            }
-        }
-        return true
-    }
-
-    private fun drawStickers(canvas: Canvas) {
-        stickers.forEach {
-            it.draw(canvas)
-        }
-
-        if (currentSticker != null) {
+        currentSticker?.draw(canvas)
+        if (currentSticker is DrawableSticker && isTouchInsideSticker) {
             getStickerPoints(currentSticker, bitmapPoints)
             val x1 = bitmapPoints[0]
             val y1 = bitmapPoints[1]
@@ -206,6 +175,102 @@ internal class StickerView(context: Context, private val stickerViewListener: St
                 icon.draw(canvas, iconPaint)
             }
         }
+
+    }
+
+//    fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+//        when (ev.action) {
+//            MotionEvent.ACTION_DOWN -> {
+//                downX = ev.x
+//                downY = ev.y
+//                return findCurrentIconTouched() != null || currentSticker != null
+//            }
+//        }
+//        return super.onInterceptTouchEvent(ev)
+//    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+//        stickerViewListener.onTouchEvent(event)
+        if (currentSticker !is DrawableSticker) {
+            return false
+        }
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> if (!onTouchDown(event)) {
+                return false
+            }
+            MotionEvent.ACTION_POINTER_DOWN -> {
+                oldDistance = calculateDistance(event)
+                oldRotation = calculateRotation(event)
+                midPoint = calculateMidPoint(event)
+                if (currentSticker != null && isInStickerArea(
+                        currentSticker!!, event.getX(1),
+                        event.getY(1)
+                    ) && findCurrentIconTouched() == null
+                ) {
+                    currentMode = ActionMode.ZOOM_WITH_TWO_FINGER
+                }
+            }
+            MotionEvent.ACTION_MOVE -> {
+                handleCurrentMode(event)
+                invalidate()
+            }
+            MotionEvent.ACTION_UP -> onTouchUp(event)
+            MotionEvent.ACTION_POINTER_UP -> {
+                currentMode = ActionMode.NONE
+            }
+        }
+        return true
+    }
+
+//    override fun onTouchEvent(event: MotionEvent): Boolean {
+//        when (event.action) {
+//            MotionEvent.ACTION_DOWN -> {
+//                downX = event.x
+//                downY = event.y
+//                currentMode = ActionMode.NONE
+//                return true // Bắt đầu nhận sự kiện touch
+//            }
+//
+//            MotionEvent.ACTION_MOVE -> {
+//                val dx = event.x - downX
+//                val dy = event.y - downY
+//
+//                // Nếu di chuyển vượt quá ngưỡng touchSlop thì xem như drag
+//                if (currentMode != ActionMode.DRAG && (abs(dx) > touchSlop || abs(dy) > touchSlop)) {
+//                    currentMode = ActionMode.DRAG
+//                    // Bắt đầu drag
+//                }
+//
+//                if (currentMode == ActionMode.DRAG) {
+//                    // Xử lý khi đang drag (ví dụ: di chuyển view)
+////                    translationX += dx
+////                    translationY += dy
+////
+////                    // Cập nhật vị trí ban đầu cho lần move kế tiếp
+////                    downX = event.x
+////                    downY = event.y
+//                    LogUtil.theNv("v day")
+//                    handleCurrentMode(event)
+//                }
+//            }
+//
+//            MotionEvent.ACTION_UP -> {
+//                if (currentMode != ActionMode.DRAG) {
+//                    // Đây là click
+//                    performClick()
+//                } else {
+//                    // Kết thúc drag
+//                }
+//            }
+//        }
+//        return true
+//    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        // Thực hiện logic click ở đây nếu muốn
+        return true
     }
 
     private fun getStickerPoints(sticker: Sticker?, dst: FloatArray) {
@@ -216,13 +281,13 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         sticker.getBoundPoints(bounds)
         val points = FloatArray(8)
         points[0] = bounds[0]
-        points[1] = bounds[1] - PADDING_VERTICAL
+        points[1] = bounds[1]
         points[2] = bounds[2]
-        points[3] = bounds[3] - PADDING_VERTICAL
+        points[3] = bounds[3]
         points[4] = bounds[4]
-        points[5] = bounds[5] + PADDING_VERTICAL
+        points[5] = bounds[5]
         points[6] = bounds[6]
-        points[7] = bounds[7] + PADDING_VERTICAL
+        points[7] = bounds[7]
         sticker.getMappedPoints(dst, points)
     }
 
@@ -299,55 +364,44 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         currentMode = ActionMode.DRAG
         downX = event.x
         downY = event.y
-        if (currentSticker != null) {
-            currentIcon = findCurrentIconTouched()
-        } else {
-            currentIcon = null
-        }
-        if (currentIcon == null) {
-            /*val sticker = stickers.filter { it.contains(downX, downY) }
-                .maxByOrNull {
-                    val bounds = RectF(0f, 0f,
-                        it.width.toFloat(),
-                        it.height.toFloat()
-                    )
-                    it.matrix.mapRect(bounds)
-                    bounds.width() * bounds.height()
-                }*/
-            val sticker = stickers.findLast { it.contains(downX, downY) && it !is PictureSticker }
-            currentSticker = sticker
-            isTouchInsideSticker = sticker != null
-            invalidate()
-        } else {
-            isTouchInsideSticker = true
-        }
         midPoint = calculateMidPoint()
         oldDistance = calculateDistance(midPoint.x, midPoint.y, downX, downY)
         oldRotation = calculateRotation(midPoint.x, midPoint.y, downX, downY)
-
+        currentIcon = findCurrentIconTouched()
+        LogUtil.theNv("vo day")
         if (currentIcon != null) {
             currentMode = ActionMode.ICON
-            currentIcon?.onActionDown(this, event)
+//            currentIcon!!.onActionDown(this, event)
         }
 
         if (currentSticker != null) {
+            isTouchInsideSticker = currentSticker!!.contains(downX, downY)
             downMatrix.set(Sticker.getMatrix(currentSticker!!))
         }
 
+//        if (currentIcon == null && !isTouchInsideSticker) {
+//            doneSticker(currentSticker)
+//            return false
+//        }
+
+        invalidate()
         return true
     }
 
     private fun handleCurrentMode(event: MotionEvent) {
         when (currentMode) {
             ActionMode.NONE, ActionMode.CLICK -> {
+                LogUtil.theNv("v day")
             }
-            ActionMode.DRAG -> if (currentSticker != null && isTouchInsideSticker) {
+            ActionMode.DRAG -> if (currentSticker != null) {
+                LogUtil.theNv("v day")
                 moveMatrix.set(downMatrix)
                 moveMatrix.postTranslate(event.x - downX, event.y - downY)
                 currentSticker!!.setMatrix(moveMatrix)
             }
 
-            ActionMode.ZOOM_WITH_TWO_FINGER -> if (currentSticker != null && isTouchInsideSticker) {
+            ActionMode.ZOOM_WITH_TWO_FINGER -> if (currentSticker != null) {
+                LogUtil.theNv("v day")
                 val newDistance = calculateDistance(event)
                 val newRotation = calculateRotation(event)
                 moveMatrix.set(downMatrix)
@@ -359,21 +413,25 @@ internal class StickerView(context: Context, private val stickerViewListener: St
                 currentSticker!!.setMatrix(moveMatrix)
             }
             ActionMode.ICON -> if (currentSticker != null && currentIcon != null) {
-                currentIcon!!.onActionMove(this, event)
+//                currentIcon!!.onActionMove(this, event)
             }
         }
     }
 
     private fun onTouchUp(event: MotionEvent) {
         if (currentMode == ActionMode.ICON && currentIcon != null && currentSticker != null) {
-            currentIcon!!.onActionUp(this, event)
+//            currentIcon!!.onActionUp(this, event)
         }
         if (currentMode == ActionMode.DRAG && abs(event.x - downX) < touchSlop && abs(event.y - downY) < touchSlop && currentSticker != null) {
-            if (!isTouchInsideSticker)
-                stickerViewListener.onClickStickerOutside(event.x, event.y)
-            else {
-                stickerViewListener.onClick()
-            }
+            isTouchInsideSticker = currentSticker!!.contains(event.x, event.y)
+
+//            if (!isTouchInsideSticker)
+//                stickerViewListener.onClickStickerOutside(event.x, event.y)
+//            else {
+//                stickerViewListener.onClick(currentSticker!!)
+//            }
+            LogUtil.theNv("$isTouchInsideSticker")
+            invalidate()
             currentMode = ActionMode.CLICK
         }
         currentMode = ActionMode.NONE
@@ -405,14 +463,14 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         return sticker.contains(tmp)
     }
 
-    fun addSticker(sticker: Sticker): StickerView {
-        if (ViewCompat.isLaidOut(this)) {
-            addStickerImmediately(sticker)
-        } else {
-            post { addStickerImmediately(sticker) }
-        }
-        return this
-    }
+//    fun addSticker(sticker: Sticker): StickerView {
+//        if (ViewCompat.isLaidOut(this)) {
+//            addStickerImmediately(sticker)
+//        } else {
+//            post { addStickerImmediately(sticker) }
+//        }
+//        return this
+//    }
 
     private fun addStickerImmediately(sticker: Sticker) {
         setStickerPosition(sticker)
@@ -421,13 +479,14 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         invalidate()
     }
 
-    fun addStickers(stickers: List<Sticker>, scale: Float) {
-        if (ViewCompat.isLaidOut(this)) {
-            addStickersImmediately(stickers, scale)
-        } else {
-            post { addStickersImmediately(stickers, scale) }
-        }
-    }
+//    fun addStickers(stickers: List<Sticker>, scale: Float): StickerView {
+//        if (ViewCompat.isLaidOut(this)) {
+//            addStickersImmediately(stickers, scale)
+//        } else {
+//            post { addStickersImmediately(stickers, scale) }
+//        }
+//        return this
+//    }
 
     private fun addStickersImmediately(stickers: List<Sticker>, scale: Float) {
         stickers.forEach {
@@ -438,22 +497,28 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     private fun setStickerPosition(sticker: Sticker, scale: Float = 1f) {
-        sticker.matrix.postScale(scale, scale)
-        sticker.matrix.postTranslate(sticker.x, sticker.y)
+//        sticker.matrix.postScale(scale, scale)
+//        sticker.matrix.postTranslate(sticker.x, sticker.y)
         sticker.getMappedCenterPoint(midPoint, point, tmp)
         sticker.matrix.postRotate(sticker.angle, midPoint.x, midPoint.y)
         sticker.matrixToClip = Matrix(sticker.matrix)
     }
 
-
-    fun addSticker(sticker: Sticker, position: Int): StickerView {
-        if (ViewCompat.isLaidOut(this)) {
-            addStickerImmediately(sticker, position)
-        } else {
-            post { addStickerImmediately(sticker, position) }
-        }
-        return this
+    fun setSticker(sticker: Sticker, scale: Float = 1f) {
+//        setStickerPosition(sticker, scale)
+//        mScaleY = scale
+        currentSticker = sticker
     }
+
+
+//    fun addSticker(sticker: Sticker, position: Int): StickerView {
+//        if (ViewCompat.isLaidOut(this)) {
+//            addStickerImmediately(sticker, position)
+//        } else {
+//            post { addStickerImmediately(sticker, position) }
+//        }
+//        return this
+//    }
 
     private fun addStickerImmediately(sticker: Sticker, position: Int) {
         setStickerPosition(sticker, position)
@@ -498,16 +563,16 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         currentSticker = null
 //        this.visibility = View.GONE
         invalidate()
-        stickerViewListener.onRemove()
+//        stickerViewListener.onRemove()
     }
 
     private fun doneSticker(sticker: Sticker?) {
-        if (sticker == null)
-            return
-        currentSticker = null
-        this.visibility = View.GONE
-        val obj = DrawObject(null, sticker, DrawType.STICKER)
-        stickerViewListener.onDone(obj)
+//        if (sticker == null)
+//            return
+//        currentSticker = null
+//        this.visibility = View.GONE
+//        val obj = DrawObject(null, sticker, DrawType.STICKER)
+//        stickerViewListener.onDone(obj)
     }
 
     private fun zoomAndRotateSticker(sticker: Sticker?, event: MotionEvent) {
@@ -521,8 +586,8 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             midPoint.y
         )
         moveMatrix.postRotate(newRotation - oldRotation, midPoint.x, midPoint.y)
-        currentSticker!!.setMatrix(moveMatrix)
-        stickerViewListener.onZoomAndRotate()
+        currentSticker?.setMatrix(moveMatrix)
+//        stickerViewListener.onZoomAndRotate()
     }
 
     private fun flipSticker(sticker: Sticker?) {
@@ -532,7 +597,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         sticker.matrix.preScale(-1f, 1f, midPoint.x, midPoint.y)
         sticker.isFlippedHorizontally = !sticker.isFlippedHorizontally
         invalidate()
-        stickerViewListener.onFlip()
+//        stickerViewListener.onFlip()
     }
 
     fun remove() {
@@ -555,7 +620,9 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         return mScaleY
     }
 
-    companion object {
-        private const val PADDING_VERTICAL = 0f
-    }
+//    fun setSticker(sticker: DrawableSticker) {
+//        this.sticker = sticker
+//        invalidate()
+//    }
+
 }
