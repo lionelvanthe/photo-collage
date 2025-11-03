@@ -64,11 +64,10 @@ open class DrawableSticker(
         drawable.bounds = realBounds
         drawable.draw(canvas)
         canvas.restore()
-
-        drawablePus?.let { mid ->
-            if (customDrawable == null) {
-                val centerX = x + width/2f
-                val centerY = y + height/2f
+        if (isDefault()) {
+            drawablePus?.let { mid ->
+                val centerX = x + width / 2f
+                val centerY = y + height / 2f
 
                 val midWidth = mid.intrinsicWidth
                 val midHeight = mid.intrinsicHeight
@@ -99,6 +98,10 @@ open class DrawableSticker(
         }
         canvas.clipPath(clipPath)
 
+    }
+
+    fun isDefault(): Boolean {
+        return customDrawable == null
     }
 
     override fun setAlpha(alpha: Int): DrawableSticker {

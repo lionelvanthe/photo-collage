@@ -440,13 +440,9 @@ class CanvasEditorView : RelativeLayout{
         }
     }
 
-    fun getCurrentSticker(): Sticker? {
-        return mStickerView.currentSticker
-    }
-
-    fun invalidateStickerView() {
+    fun updateImageSticker(drawable: Drawable) {
         if (mStickerView.visibility == View.VISIBLE) {
-            mStickerView.invalidate()
+            mStickerView.updateImageCurrentSticker(drawable)
         }
     }
 }

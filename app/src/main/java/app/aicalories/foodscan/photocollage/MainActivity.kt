@@ -49,10 +49,9 @@ class MainActivity : AppCompatActivity() {
         // photo picker.
         uri?.let {
             val inputStream = this.contentResolver.openInputStream(it)
-            binding.canvasEditor.getCurrentSticker()?.setDrawable(Drawable.createFromStream(inputStream, it.toString()).also {
+            binding.canvasEditor.updateImageSticker(Drawable.createFromStream(inputStream, it.toString()).also {
                 inputStream?.close()
             }!!)
-            binding.canvasEditor.invalidateStickerView()
         }
     }
 

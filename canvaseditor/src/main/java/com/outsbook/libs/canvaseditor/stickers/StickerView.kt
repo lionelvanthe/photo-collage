@@ -3,6 +3,7 @@ package com.outsbook.libs.canvaseditor.stickers
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
@@ -355,15 +356,19 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     private fun onTouchUp(event: MotionEvent) {
         if (currentMode == ActionMode.ICON && currentIcon != null && currentSticker != null) {
             currentIcon?.onActionUp(this, event)
+            currentMode = ActionMode.SELECT
         } else {
             val sticker = stickers.findLast { it.contains(event.x, event.y) && it !is PictureSticker }
             currentSticker = sticker
-            if (currentMode != ActionMode.DRAG) {
-                currentMode = if (currentSticker != null) {
-                    ActionMode.SELECT
-                } else {
+            currentMode = if (currentSticker != null) {
+                if ((currentSticker as? DrawableSticker)?.isDefault() == true) {
+                    stickerViewListener.onClick()
                     ActionMode.NONE
+                } else {
+                    ActionMode.SELECT
                 }
+            } else {
+                ActionMode.NONE
             }
             invalidate()
         }
@@ -544,6 +549,13 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     fun getMScaleY(): Float {
         return mScaleY
     }
+
+    fun updateImageCurrentSticker(drawable: Drawable) {
+        currentSticker?.setDrawable(drawable)
+        currentMode = ActionMode.SELECT
+        invalidate()
+    }
+
 
     companion object {
         private const val PADDING_VERTICAL = 0f
