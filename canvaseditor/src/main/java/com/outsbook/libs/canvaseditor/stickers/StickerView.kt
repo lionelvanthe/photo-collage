@@ -17,8 +17,7 @@ import com.outsbook.libs.canvaseditor.constants.ConstantSticker
 import com.outsbook.libs.canvaseditor.constants.ConstantStickerIcon
 import com.outsbook.libs.canvaseditor.enums.DrawType
 import com.outsbook.libs.canvaseditor.events.DeleteIconEvent
-import com.outsbook.libs.canvaseditor.events.DoneIconEvent
-import com.outsbook.libs.canvaseditor.events.FlipIconEvent
+import com.outsbook.libs.canvaseditor.events.ReplaceIconEvent
 import com.outsbook.libs.canvaseditor.events.ZoomIconEvent
 import com.outsbook.libs.canvaseditor.listeners.StickerViewListener
 import com.outsbook.libs.canvaseditor.models.DrawObject
@@ -89,26 +88,20 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             ConstantStickerIcon.LEFT_TOP
         )
         deleteIcon.iconListener = DeleteIconEvent()
-        val doneIcon = StickerIcon(
-            ContextCompat.getDrawable(context, R.drawable.ic_done_white_20dp),
+        val replaceIcon = StickerIcon(
+            ContextCompat.getDrawable(context, R.drawable.ic_replace_image),
             ConstantStickerIcon.RIGHT_TOP
         )
-        doneIcon.iconListener = DoneIconEvent()
+        replaceIcon.iconListener = ReplaceIconEvent()
         val zoomIcon = StickerIcon(
             ContextCompat.getDrawable(context, R.drawable.ic_rotate_scale_white_17dp),
             ConstantStickerIcon.RIGHT_BOTTOM
         )
         zoomIcon.iconListener = ZoomIconEvent()
-        val flipIcon = StickerIcon(
-            ContextCompat.getDrawable(context, R.drawable.ic_flip_white_20dp),
-            ConstantStickerIcon.LEFT_BOTTOM
-        )
-        flipIcon.iconListener = FlipIconEvent()
         icons.clear()
         icons.add(deleteIcon)
-        icons.add(doneIcon)
+        icons.add(replaceIcon)
         icons.add(zoomIcon)
-        icons.add(flipIcon)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -569,30 +562,16 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         stickerViewListener.onZoomAndRotate()
     }
 
-    private fun flipSticker(sticker: Sticker?) {
-        if (sticker == null)
-            return
-        sticker.getCenterPoint(midPoint)
-        sticker.matrix.preScale(-1f, 1f, midPoint.x, midPoint.y)
-        sticker.isFlippedHorizontally = !sticker.isFlippedHorizontally
-        invalidate()
-        stickerViewListener.onFlip()
-    }
-
     fun remove() {
         removeSticker(currentSticker)
     }
 
-    fun done() {
-//        doneSticker(currentSticker)
+    fun replaceImage() {
+        stickerViewListener.onClick()
     }
 
     fun zoomAndRotate(event: MotionEvent) {
         zoomAndRotateSticker(currentSticker, event)
-    }
-
-    fun flip() {
-        flipSticker(currentSticker)
     }
 
     fun getMScaleY(): Float {

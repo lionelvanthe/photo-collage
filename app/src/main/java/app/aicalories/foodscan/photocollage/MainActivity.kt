@@ -244,10 +244,6 @@ class MainActivity : AppCompatActivity() {
                 //When the active sticker zoom or rotate
             }
 
-            override fun onStickerFlip() {
-                //When the active sticker flip
-            }
-
             override fun onClick() {
                 pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }

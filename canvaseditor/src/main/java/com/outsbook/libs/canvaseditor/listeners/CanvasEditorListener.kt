@@ -11,6 +11,5 @@ interface CanvasEditorListener {
     fun onStickerRemove() {}
     fun onStickerDone() {}
     fun onStickerZoomAndRotate() {}
-    fun onStickerFlip() {}
     fun onClick() {}
 }

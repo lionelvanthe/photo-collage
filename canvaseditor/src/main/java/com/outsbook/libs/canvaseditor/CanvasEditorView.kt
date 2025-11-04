@@ -90,9 +90,6 @@ class CanvasEditorView : RelativeLayout{
         override fun onZoomAndRotate() {
             mListener?.onStickerZoomAndRotate()
         }
-        override fun onFlip() {
-            mListener?.onStickerFlip()
-        }
 
         override fun onClickStickerOutside(x: Float, y: Float) {
             val pos = findTapedSticker(x, y)
@@ -326,12 +323,6 @@ class CanvasEditorView : RelativeLayout{
         addBitmapSticker(bitmap, totalBounds.left, totalBounds.top)
     }
 
-    fun doneActiveSticker(){
-        if (mStickerView.visibility == View.VISIBLE) {
-            mStickerView.done()
-        }
-    }
-
     fun removeActiveSticker(){
         if (mStickerView.visibility == View.VISIBLE) {
             mStickerView.remove()
@@ -343,13 +334,6 @@ class CanvasEditorView : RelativeLayout{
             mStickerView.zoomAndRotate(motionEvent)
         }
     }
-
-    fun flipActiveSticker(){
-        if (mStickerView.visibility == View.VISIBLE) {
-            mStickerView.flip()
-        }
-    }
-    //endregion
 
     fun undo() {
         mStickerView.undo()
@@ -428,7 +412,7 @@ class CanvasEditorView : RelativeLayout{
 
     private fun doneStickerEdit() {
         if (mStickerView.visibility == View.VISIBLE) {
-            mStickerView.done()
+//            mStickerView.done()
         }
     }
 
