@@ -108,6 +108,10 @@ open class DrawableSticker(
         return customDrawable == null
     }
 
+    fun resetDrawable() {
+        setDrawable(defaultDrawable)
+    }
+
     override fun setAlpha(alpha: Int): DrawableSticker {
         drawable.alpha = alpha
         return this

@@ -207,6 +207,9 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             val rotation = calculateRotation(x4, y4, x3, y3)
             for (i in icons.indices) {
                 val icon = icons[i]
+                if (currentSticker !is DrawableSticker && icon.position == ConstantStickerIcon.RIGHT_TOP) {
+                    continue
+                }
                 when (icon.position) {
                     ConstantStickerIcon.LEFT_TOP -> configIconMatrix(icon, x1, y1, rotation)
                     ConstantStickerIcon.RIGHT_TOP -> configIconMatrix(icon, x2, y2, rotation)
@@ -506,6 +509,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             height / 2.toFloat()
         )
         currentSticker = sticker
+        currentMode = ActionMode.SELECT
         stickers.add(sticker)
         invalidate()
     }
@@ -531,9 +535,13 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     private fun removeSticker(sticker: Sticker?) {
         if (sticker == null)
             return
-        stickers.remove(sticker)
+        if (sticker is DrawableSticker) {
+            sticker.resetDrawable()
+        } else {
+            stickers.remove(sticker)
+        }
         currentSticker = null
-//        this.visibility = View.GONE
+        currentMode = ActionMode.NONE
         invalidate()
         stickerViewListener.onRemove()
     }
