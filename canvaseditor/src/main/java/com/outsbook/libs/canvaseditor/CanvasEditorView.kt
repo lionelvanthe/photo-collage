@@ -323,12 +323,6 @@ class CanvasEditorView : RelativeLayout{
         addBitmapSticker(bitmap, totalBounds.left, totalBounds.top)
     }
 
-    fun removeActiveSticker(){
-        if (mStickerView.visibility == View.VISIBLE) {
-            mStickerView.remove()
-        }
-    }
-
     fun zoomAndRotateActiveSticker(motionEvent: MotionEvent){
         if (mStickerView.visibility == View.VISIBLE) {
             mStickerView.zoomAndRotate(motionEvent)
@@ -350,7 +344,6 @@ class CanvasEditorView : RelativeLayout{
     fun removeAll(){
         mUndoList.clear()
         mRedoList.clear()
-        mStickerView.remove()
         mPaintView.initCanvas()
         mListener?.onEnableUndo(false)
         mListener?.onEnableRedo(false)

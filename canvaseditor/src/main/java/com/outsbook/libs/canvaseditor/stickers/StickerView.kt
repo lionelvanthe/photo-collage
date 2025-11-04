@@ -21,6 +21,7 @@ import com.outsbook.libs.canvaseditor.events.ReplaceIconEvent
 import com.outsbook.libs.canvaseditor.events.ZoomIconEvent
 import com.outsbook.libs.canvaseditor.listeners.StickerViewListener
 import com.outsbook.libs.canvaseditor.models.DrawObject
+import com.outsbook.libs.canvaseditor.models.undoredo.AddStickerCommand
 import com.outsbook.libs.canvaseditor.models.undoredo.MoveStickerCommand
 import com.outsbook.libs.canvaseditor.models.undoredo.ReplaceImageCommand
 import com.outsbook.libs.canvaseditor.models.undoredo.ZoomAndRotateStickerCommand
@@ -445,18 +446,30 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         return sticker.contains(tmp)
     }
 
-    fun addSticker(sticker: Sticker): StickerView {
+    fun addSticker(sticker: Sticker) {
         if (ViewCompat.isLaidOut(this)) {
             addStickerImmediately(sticker)
         } else {
             post { addStickerImmediately(sticker) }
         }
-        return this
     }
 
     private fun addStickerImmediately(sticker: Sticker) {
         setStickerPosition(sticker)
+        executeAddSticker(sticker)
+    }
+
+    fun executeAddSticker(sticker: Sticker) {
+        commendManager.execute(
+            AddStickerCommand(sticker, this)
+        )
+        stickerViewListener.canRedo(commendManager.canRedo())
+        stickerViewListener.canUndo(commendManager.canUndo())
+    }
+
+    fun addStickerToView(sticker: Sticker) {
         currentSticker = sticker
+        currentMode = ActionMode.SELECT
         stickers.add(sticker)
         invalidate()
     }
@@ -486,13 +499,12 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
 
-    fun addSticker(sticker: Sticker, position: Int): StickerView {
+    fun addSticker(sticker: Sticker, position: Int) {
         if (ViewCompat.isLaidOut(this)) {
             addStickerImmediately(sticker, position)
         } else {
             post { addStickerImmediately(sticker, position) }
         }
-        return this
     }
 
     private fun addStickerImmediately(sticker: Sticker, position: Int) {
@@ -508,10 +520,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             width / 2.toFloat(),
             height / 2.toFloat()
         )
-        currentSticker = sticker
-        currentMode = ActionMode.SELECT
-        stickers.add(sticker)
-        invalidate()
+        executeAddSticker(sticker)
     }
 
     private fun setStickerPosition(sticker: Sticker, position: Int) {
@@ -532,7 +541,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         sticker.matrix.postTranslate(offsetX, offsetY)
     }
 
-    private fun removeSticker(sticker: Sticker?) {
+    fun removeSticker(sticker: Sticker?) {
         if (sticker == null)
             return
         if (sticker is DrawableSticker) {
@@ -570,7 +579,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         stickerViewListener.onZoomAndRotate()
     }
 
-    fun remove() {
+    fun removeByIcon() {
         removeSticker(currentSticker)
     }
 

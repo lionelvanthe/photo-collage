@@ -8,6 +8,6 @@ internal class DeleteIconEvent: StickerIconListener {
     override fun onActionDown(stickerView: StickerView?, event: MotionEvent?) {}
     override fun onActionMove(stickerView: StickerView, event: MotionEvent) {}
     override fun onActionUp(stickerView: StickerView, event: MotionEvent?) {
-        stickerView.remove()
+        stickerView.removeByIcon()
     }
 }
