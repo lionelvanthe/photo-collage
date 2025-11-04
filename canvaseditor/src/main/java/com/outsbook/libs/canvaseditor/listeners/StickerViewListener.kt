@@ -11,4 +11,6 @@ internal interface StickerViewListener {
     fun onClickStickerOutside(x: Float, y: Float)
     fun onClick()
     fun onTouchEvent(event: MotionEvent)
+    fun canUndo(canUndo: Boolean)
+    fun canRedo(canRedo: Boolean)
 }

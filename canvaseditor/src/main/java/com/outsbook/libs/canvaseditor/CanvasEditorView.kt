@@ -105,6 +105,14 @@ class CanvasEditorView : RelativeLayout{
             mListener?.onTouchEvent(event)
         }
 
+        override fun canUndo(canUndo: Boolean) {
+            mListener?.onEnableUndo(canUndo)
+        }
+
+        override fun canRedo(canRedo: Boolean) {
+            mListener?.onEnableRedo(canRedo)
+        }
+
         override fun onClick() {
             mListener?.onClick()
         }
@@ -344,31 +352,15 @@ class CanvasEditorView : RelativeLayout{
     //endregion
 
     fun undo() {
-        if (mStickerView.visibility == View.VISIBLE) {
-            mStickerView.remove()
-            return
-        }
-        if (mUndoList.isNotEmpty()) {
-            mRedoList.add(mUndoList.last())
-            mUndoList.removeAt(mUndoList.lastIndex)
-            mPaintView.initCanvas()
-            mUndoList.forEach {
-                drawObject(it)
-            }
-            mListener?.onEnableUndo(mUndoList.isNotEmpty())
-            mListener?.onEnableRedo(mRedoList.isNotEmpty())
-        }
+        mStickerView.undo()
+        mListener?.onEnableUndo(mStickerView.canUndo())
+        mListener?.onEnableRedo(mStickerView.canRedo())
     }
 
     fun redo() {
-        if (mRedoList.isNotEmpty()) {
-            val obj = mRedoList.last()
-            mUndoList.add(obj)
-            mRedoList.removeAt(mRedoList.lastIndex)
-            drawObject(obj)
-            mListener?.onEnableUndo(mUndoList.isNotEmpty())
-            mListener?.onEnableRedo(mRedoList.isNotEmpty())
-        }
+        mStickerView.redo()
+        mListener?.onEnableUndo(mStickerView.canUndo())
+        mListener?.onEnableRedo(mStickerView.canRedo())
     }
 
     fun removeAll(){
@@ -441,9 +433,7 @@ class CanvasEditorView : RelativeLayout{
     }
 
     fun updateImageSticker(drawable: Drawable) {
-        if (mStickerView.visibility == View.VISIBLE) {
-            mStickerView.updateImageCurrentSticker(drawable)
-        }
+        mStickerView.updateImageCurrentSticker(drawable)
     }
 }
 //endregion

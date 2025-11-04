@@ -9,5 +9,7 @@ internal class ZoomIconEvent: StickerIconListener {
     override fun onActionMove(stickerView: StickerView, event: MotionEvent) {
         stickerView.zoomAndRotate(event)
     }
-    override fun onActionUp(stickerView: StickerView, event: MotionEvent?) {}
+    override fun onActionUp(stickerView: StickerView, event: MotionEvent?) {
+        stickerView.executeCommendZoomAndRotate()
+    }
 }

@@ -10,6 +10,7 @@ import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import com.outsbook.libs.canvaseditor.CommandManager
 import com.outsbook.libs.canvaseditor.R
 import com.outsbook.libs.canvaseditor.constants.ActionMode
 import com.outsbook.libs.canvaseditor.constants.ConstantSticker
@@ -21,6 +22,9 @@ import com.outsbook.libs.canvaseditor.events.FlipIconEvent
 import com.outsbook.libs.canvaseditor.events.ZoomIconEvent
 import com.outsbook.libs.canvaseditor.listeners.StickerViewListener
 import com.outsbook.libs.canvaseditor.models.DrawObject
+import com.outsbook.libs.canvaseditor.models.undoredo.MoveStickerCommand
+import com.outsbook.libs.canvaseditor.models.undoredo.ReplaceImageCommand
+import com.outsbook.libs.canvaseditor.models.undoredo.ZoomAndRotateStickerCommand
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -63,6 +67,12 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         color = Color.BLACK
         alpha = 128
     }
+
+    private val commendManager by lazy {
+        CommandManager()
+    }
+
+    private var multiTouchUp = false
 
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
     private var currentIcon: StickerIcon? = null
@@ -164,8 +174,15 @@ internal class StickerView(context: Context, private val stickerViewListener: St
                 handleCurrentMode(event)
                 invalidate()
             }
-            MotionEvent.ACTION_UP -> onTouchUp(event)
+            MotionEvent.ACTION_UP -> {
+                if (multiTouchUp) {
+                    multiTouchUp = false
+                    currentMode = ActionMode.ZOOM_WITH_TWO_FINGER
+                }
+                onTouchUp(event)
+            }
             MotionEvent.ACTION_POINTER_UP -> {
+                multiTouchUp = true
                 currentMode = ActionMode.NONE
             }
         }
@@ -345,10 +362,10 @@ internal class StickerView(context: Context, private val stickerViewListener: St
                     midPoint.y
                 )
                 moveMatrix.postRotate(newRotation - oldRotation, midPoint.x, midPoint.y)
-                currentSticker!!.setMatrix(moveMatrix)
+                currentSticker?.setMatrix(moveMatrix)
             }
             ActionMode.ICON -> if (currentSticker != null && currentIcon != null) {
-                currentIcon!!.onActionMove(this, event)
+                currentIcon?.onActionMove(this, event)
             }
         }
     }
@@ -358,20 +375,52 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             currentIcon?.onActionUp(this, event)
             currentMode = ActionMode.SELECT
         } else {
-            val sticker = stickers.findLast { it.contains(event.x, event.y) && it !is PictureSticker }
-            currentSticker = sticker
-            currentMode = if (currentSticker != null) {
-                if ((currentSticker as? DrawableSticker)?.isDefault() == true) {
-                    stickerViewListener.onClick()
-                    ActionMode.NONE
-                } else {
-                    ActionMode.SELECT
+            when (currentMode) {
+                ActionMode.DRAG -> {
+                    currentSticker?.let { sticker ->
+                        val fromMatrix = Matrix(downMatrix)
+                        val toMatrix = Matrix(sticker.matrix)
+                        commendManager.execute(
+                            MoveStickerCommand(fromMatrix, toMatrix, sticker, this)
+                        )
+                    }
+                    stickerViewListener.canRedo(commendManager.canRedo())
+                    stickerViewListener.canUndo(commendManager.canUndo())
+                    currentMode = ActionMode.SELECT
                 }
-            } else {
-                ActionMode.NONE
+                ActionMode.ZOOM_WITH_TWO_FINGER -> {
+                    executeCommendZoomAndRotate()
+                    currentMode = ActionMode.SELECT
+                }
+                else -> {
+                    val sticker = stickers.findLast { it.contains(event.x, event.y) && it !is PictureSticker }
+                    currentSticker = sticker
+                    currentMode = if (currentSticker != null) {
+                        if ((currentSticker as? DrawableSticker)?.isDefault() == true) {
+                            stickerViewListener.onClick()
+                            ActionMode.NONE
+                        } else {
+                            ActionMode.SELECT
+                        }
+                    } else {
+                        ActionMode.NONE
+                    }
+                }
             }
             invalidate()
         }
+    }
+
+    fun executeCommendZoomAndRotate() {
+        currentSticker?.let { sticker ->
+            val fromMatrix = Matrix(downMatrix)
+            val toMatrix = Matrix(sticker.matrix)
+            commendManager.execute(
+                ZoomAndRotateStickerCommand(fromMatrix, toMatrix, sticker, this)
+            )
+        }
+        stickerViewListener.canRedo(commendManager.canRedo())
+        stickerViewListener.canUndo(commendManager.canUndo())
     }
 
     private fun calculateMidPoint(event: MotionEvent?): PointF {
@@ -516,7 +565,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             midPoint.y
         )
         moveMatrix.postRotate(newRotation - oldRotation, midPoint.x, midPoint.y)
-        currentSticker!!.setMatrix(moveMatrix)
+        currentSticker?.setMatrix(moveMatrix)
         stickerViewListener.onZoomAndRotate()
     }
 
@@ -551,11 +600,34 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     fun updateImageCurrentSticker(drawable: Drawable) {
-        currentSticker?.setDrawable(drawable)
-        currentMode = ActionMode.SELECT
-        invalidate()
+        currentSticker?.let {
+            commendManager.execute(
+                ReplaceImageCommand(drawable, it as DrawableSticker, this)
+            )
+        }
+        stickerViewListener.canRedo(commendManager.canRedo())
+        stickerViewListener.canUndo(commendManager.canUndo())
     }
 
+    fun undo() {
+        commendManager.undo()
+    }
+
+    fun redo() {
+        commendManager.redo()
+    }
+
+    fun canRedo(): Boolean {
+        return commendManager.canRedo()
+    }
+
+    fun canUndo(): Boolean {
+        return commendManager.canUndo()
+    }
+
+    fun updateMode(mode: Int) {
+        currentMode = mode
+    }
 
     companion object {
         private const val PADDING_VERTICAL = 0f

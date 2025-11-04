@@ -35,7 +35,11 @@ open class DrawableSticker(
     val xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_IN)
 
     override fun setDrawable(drawable: Drawable): DrawableSticker {
-        this.customDrawable = drawable
+        if (drawable == defaultDrawable) {
+            this.customDrawable = null
+        } else {
+            this.customDrawable = drawable
+        }
         matrix.reset()
 
         val targetWidth = defaultDrawable.intrinsicWidth.toFloat()
