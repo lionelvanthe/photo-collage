@@ -7,5 +7,6 @@ internal class ActionMode {
         var ZOOM_WITH_TWO_FINGER = 2
         var ICON = 3
         var SELECT = 4
+        var POINTER_UP = 5
     }
 }

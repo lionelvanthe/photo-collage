@@ -10,6 +10,7 @@ import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import com.outsbook.libs.canvaseditor.LogUtil
 import com.outsbook.libs.canvaseditor.R
 import com.outsbook.libs.canvaseditor.constants.ActionMode
 import com.outsbook.libs.canvaseditor.constants.ConstantSticker
@@ -177,8 +178,10 @@ internal class StickerView(context: Context, private val stickerViewListener: St
                 onTouchUp(event)
             }
             MotionEvent.ACTION_POINTER_UP -> {
-                multiTouchUp = true
-                currentMode = ActionMode.NONE
+                if (currentMode == ActionMode.ZOOM_WITH_TWO_FINGER) {
+                    multiTouchUp = true
+                    currentMode = ActionMode.POINTER_UP
+                }
             }
         }
         return true
@@ -375,18 +378,25 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             when (currentMode) {
                 ActionMode.DRAG -> {
                     currentSticker?.let { sticker ->
-                        val fromMatrix = Matrix(downMatrix)
-                        val toMatrix = Matrix(sticker.matrix)
-                        commendManager.execute(
-                            MoveStickerCommand(fromMatrix, toMatrix, sticker)
-                        )
+                        if (isTouchInsideSticker) {
+                            val fromMatrix = Matrix(downMatrix)
+                            val toMatrix = Matrix(sticker.matrix)
+                            commendManager.execute(
+                                MoveStickerCommand(fromMatrix, toMatrix, sticker)
+                            )
+                            stickerViewListener.canRedo(commendManager.canRedo())
+                            stickerViewListener.canUndo(commendManager.canUndo())
+                        }
+
                     }
-                    stickerViewListener.canRedo(commendManager.canRedo())
-                    stickerViewListener.canUndo(commendManager.canUndo())
                     currentMode = ActionMode.SELECT
                 }
                 ActionMode.ZOOM_WITH_TWO_FINGER -> {
-                    executeCommendZoomAndRotate()
+                    if (isTouchInsideSticker) {
+                        executeCommendZoomAndRotate()
+                    } else {
+                        currentMode = ActionMode.SELECT
+                    }
                 }
                 else -> {
                     val sticker = findSticker(event.x, event.y)
