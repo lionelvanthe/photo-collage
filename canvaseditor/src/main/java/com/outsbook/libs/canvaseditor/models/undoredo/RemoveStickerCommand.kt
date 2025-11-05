@@ -3,17 +3,17 @@ package com.outsbook.libs.canvaseditor.models.undoredo
 import com.outsbook.libs.canvaseditor.stickers.Sticker
 import com.outsbook.libs.canvaseditor.stickers.StickerView
 
-internal class AddStickerCommand(
+internal class RemoveStickerCommand(
     private val sticker: Sticker,
     private val stickerView: StickerView
 ) : Command {
 
     override fun execute() {
-        stickerView.addStickerToView(sticker)
+        stickerView.removeStickerInView(sticker)
     }
 
     override fun undo() {
-        stickerView.removeStickerInView(sticker)
+        stickerView.addStickerToView(sticker)
     }
 
     override fun redo() {

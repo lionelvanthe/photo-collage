@@ -1,33 +1,27 @@
 package com.outsbook.libs.canvaseditor.models.undoredo
 
+import android.graphics.Matrix
 import android.graphics.drawable.Drawable
-import com.outsbook.libs.canvaseditor.constants.ActionMode
 import com.outsbook.libs.canvaseditor.stickers.DrawableSticker
 import com.outsbook.libs.canvaseditor.stickers.StickerView
 
 internal class ReplaceImageCommand(
+    private val preDrawable: Drawable,
     private val drawable: Drawable,
+    private val matrix: Matrix? = null,
     private val sticker: DrawableSticker,
     private val stickerView: StickerView
 ) : Command {
 
-    private val preDrawable: Drawable = sticker.drawable
-
     override fun execute() {
-        sticker.setDrawable(drawable)
-        stickerView.updateMode(ActionMode.SELECT)
-        stickerView.invalidate()
+        stickerView.updateDrawableOfSticker(drawable, sticker, null)
     }
 
     override fun undo() {
-        sticker.setDrawable(preDrawable)
-        stickerView.updateMode(ActionMode.NONE)
-        stickerView.invalidate()
+        stickerView.updateDrawableOfSticker(preDrawable, sticker, matrix)
     }
 
     override fun redo() {
-        sticker.setDrawable(drawable)
-        stickerView.updateMode(ActionMode.NONE)
-        stickerView.invalidate()
+        execute()
     }
 }

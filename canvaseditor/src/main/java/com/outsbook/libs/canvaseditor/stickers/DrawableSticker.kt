@@ -2,6 +2,7 @@ package com.outsbook.libs.canvaseditor.stickers
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PorterDuff
@@ -11,7 +12,7 @@ import android.graphics.RectF
 import android.graphics.drawable.Drawable
 
 open class DrawableSticker(
-    private val defaultDrawable: Drawable,
+    val defaultDrawable: Drawable,
     override val x: Float = 0f,
     override val y: Float = 0f,
     override val angle: Float = 0f
@@ -40,24 +41,31 @@ open class DrawableSticker(
         } else {
             this.customDrawable = drawable
         }
-        matrix.reset()
-
-        val targetWidth = defaultDrawable.intrinsicWidth.toFloat()
-        val targetHeight = defaultDrawable.intrinsicHeight.toFloat()
-
-        val srcWidth = drawable.intrinsicWidth.toFloat()
-        val srcHeight = drawable.intrinsicHeight.toFloat()
-
-        val scale = targetWidth / drawable.intrinsicWidth.toFloat()
-        val dx = (targetWidth - srcWidth * scale) / 2f
-        val dy = (targetHeight - srcHeight * scale) / 2f
-
-        matrix.postScale(scale, scale)
-        matrix.postTranslate(dx + x, dy + y)
-        val centerX = x + targetWidth / 2f
-        val centerY = y + targetHeight / 2f
-        matrix.postRotate(angle, centerX, centerY)
         return this
+    }
+
+    fun setDrawable(drawable: Drawable, newMatrix: Matrix?) {
+        setDrawable(drawable)
+        matrix.reset()
+        newMatrix?.let {
+            matrix.set(it)
+        }?: run {
+            val targetWidth = defaultDrawable.intrinsicWidth.toFloat()
+            val targetHeight = defaultDrawable.intrinsicHeight.toFloat()
+
+            val srcWidth = drawable.intrinsicWidth.toFloat()
+            val srcHeight = drawable.intrinsicHeight.toFloat()
+
+            val scale = targetWidth / drawable.intrinsicWidth.toFloat()
+            val dx = (targetWidth - srcWidth * scale) / 2f
+            val dy = (targetHeight - srcHeight * scale) / 2f
+
+            matrix.postScale(scale, scale)
+            matrix.postTranslate(dx + x, dy + y)
+            val centerX = x + targetWidth / 2f
+            val centerY = y + targetHeight / 2f
+            matrix.postRotate(angle, centerX, centerY)
+        }
     }
 
     override fun draw(canvas: Canvas) {
@@ -106,10 +114,6 @@ open class DrawableSticker(
 
     fun isDefault(): Boolean {
         return customDrawable == null
-    }
-
-    fun resetDrawable() {
-        setDrawable(defaultDrawable)
     }
 
     override fun setAlpha(alpha: Int): DrawableSticker {
