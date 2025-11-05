@@ -1,8 +1,6 @@
-package com.welly.myapplication.lottierecorder
+package app.aicalories.foodscan.photocollage.lottierecorder
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
@@ -10,7 +8,6 @@ import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
 import android.media.MediaMuxer
-import android.opengl.GLES20
 import android.util.Log
 import android.view.Surface
 import java.io.Closeable
@@ -72,7 +69,7 @@ class Recorder(
         createMediaMuxer(videoOutput)
     }
 
-    fun nextFrame(currentFrame: Drawable) {
+    fun nextFrame(frameComposer: FrameCreator) {
         drainEncoder(false)
         val canvas = inputSurface.lockCanvas(null)
         try {
@@ -80,7 +77,7 @@ class Recorder(
                 Color.TRANSPARENT,
                 PorterDuff.Mode.CLEAR
             )  // Here you need to set some kind of background. Could be any color
-            currentFrame.draw(canvas)
+            frameComposer.renderToCanvas(canvas)
         } finally {
             inputSurface.unlockCanvasAndPost(canvas)
         }

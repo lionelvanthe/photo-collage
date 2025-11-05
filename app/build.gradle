@@ -62,7 +62,7 @@ dependencies {
     implementation project(':canvaseditor')
     implementation( libs.lottie)
     implementation libs.coil
-
+    implementation libs.android.gif.drawable
     implementation libs.gson
 
 }

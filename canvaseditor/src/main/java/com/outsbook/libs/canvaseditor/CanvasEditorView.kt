@@ -35,6 +35,8 @@ import kotlin.math.ceil
 import androidx.core.graphics.createBitmap
 import com.outsbook.libs.canvaseditor.constants.ConstantSticker
 import com.outsbook.libs.canvaseditor.followtext.FollowTextView
+import com.outsbook.libs.canvaseditor.stickers.GifSticker
+import pl.droidsonroids.gif.GifDrawable
 
 class CanvasEditorView : RelativeLayout{
     @JvmOverloads
@@ -224,6 +226,13 @@ class CanvasEditorView : RelativeLayout{
         mStickerView.addSticker(sticker, ConstantSticker.CENTER)
         mListener?.onEnableUndo(true)
         mListener?.onEnableRedo(false)
+        mListener?.onStickerActive()
+    }
+
+    fun addGifSticker(gifDrawable: GifDrawable) {
+        doneStickerEdit()
+        val sticker = GifSticker(context, gifDrawable)
+        mStickerView.addSticker(sticker, ConstantSticker.CENTER)
         mListener?.onStickerActive()
     }
 

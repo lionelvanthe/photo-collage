@@ -18,6 +18,7 @@ import com.outsbook.libs.canvaseditor.enums.DrawType
 import com.outsbook.libs.canvaseditor.events.DeleteIconEvent
 import com.outsbook.libs.canvaseditor.events.ReplaceIconEvent
 import com.outsbook.libs.canvaseditor.events.ZoomIconEvent
+import com.outsbook.libs.canvaseditor.layer.DrawableLayer
 import com.outsbook.libs.canvaseditor.listeners.StickerViewListener
 import com.outsbook.libs.canvaseditor.models.DrawObject
 import com.outsbook.libs.canvaseditor.undoredo.CommandManager
@@ -77,7 +78,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
     private var currentIcon: StickerIcon? = null
-    private var stickers = mutableListOf<Sticker>()
+    private var layers = mutableListOf<DrawableLayer>()
     private var mScaleY = 1f
 
     init {
@@ -114,9 +115,6 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         if (mScaleY > 1) {
             mScaleY = 1f
         }
-//        currentSticker?.let {
-//            transformSticker(it)
-//        }
     }
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
@@ -185,7 +183,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     private fun drawStickers(canvas: Canvas) {
-        stickers.forEach {
+        layers.forEach {
             it.draw(canvas)
         }
         if (currentSticker != null && currentMode != ActionMode.NONE) {
@@ -313,10 +311,10 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     private fun onTouchDown(event: MotionEvent): Boolean {
         downX = event.x
         downY = event.y
-        if (currentSticker != null) {
-            currentIcon = findCurrentIconTouched()
+        currentIcon = if (currentSticker != null) {
+            findCurrentIconTouched()
         } else {
-            currentIcon = null
+            null
         }
         isTouchInsideSticker = currentSticker?.contains(event.x, event.y)?: false
 
@@ -389,7 +387,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
                     executeCommendZoomAndRotate()
                 }
                 else -> {
-                    val sticker = stickers.findLast { it.contains(event.x, event.y) && it !is PictureSticker }
+                    val sticker = findSticker(event.x, event.y)
                     currentSticker = sticker
                     currentMode = if (currentSticker != null) {
                         if ((currentSticker as? DrawableSticker)?.isDefault() == true) {
@@ -405,6 +403,17 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             }
             invalidate()
         }
+    }
+
+    private fun findSticker(x: Float, y: Float): Sticker? {
+        var sticker: Sticker?
+        for (i in layers.size -1 downTo 0) {
+            sticker = layers[i].findSelectSticker(x, y)
+            if (sticker != null) {
+                return sticker
+            }
+        }
+        return null
     }
 
     fun executeCommendZoomAndRotate() {
@@ -470,7 +479,9 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     fun addStickerToView(sticker: Sticker) {
         currentSticker = sticker
         currentMode = ActionMode.SELECT
-        stickers.add(sticker)
+        val layer = DrawableLayer()
+        layer.addSticker(sticker)
+        layers.add(layer)
         invalidate()
     }
 
@@ -486,7 +497,9 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         stickers.forEach {
             setStickerPosition(it, scale)
         }
-        this.stickers = stickers.toMutableList()
+        val layer = DrawableLayer()
+        layer.addStickers(stickers)
+        layers.add(layer)
         invalidate()
     }
 
@@ -512,14 +525,14 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         val scaleFactor: Float
         val widthScaleFactor: Float = width.toFloat() / sticker.drawable.intrinsicWidth
         val heightScaleFactor: Float = height.toFloat() / sticker.drawable.intrinsicHeight
-        scaleFactor =
-            if (widthScaleFactor > heightScaleFactor) heightScaleFactor else widthScaleFactor
-        sticker.matrix.postScale(
-            scaleFactor / 2,
-            scaleFactor / 2,
-            width / 2.toFloat(),
-            height / 2.toFloat()
-        )
+//        scaleFactor =
+//            if (widthScaleFactor > heightScaleFactor) heightScaleFactor else widthScaleFactor
+//        sticker.matrix.postScale(
+//            scaleFactor / 2,
+//            scaleFactor / 2,
+//            width / 2.toFloat(),
+//            height / 2.toFloat()
+//        )
         executeAddSticker(sticker)
     }
 
@@ -557,7 +570,12 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     fun removeStickerInView(sticker: Sticker) {
-        stickers.remove(sticker)
+        for (i in layers.size -1 downTo 0) {
+            if (layers[i].removeSticker(sticker)) {
+                layers.removeAt(i)
+                break
+            }
+        }
         currentSticker = null
         currentMode = ActionMode.NONE
         invalidate()
@@ -568,7 +586,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         if (sticker == null)
             return
         currentSticker = null
-        this.visibility = View.GONE
+        this.visibility = GONE
         val obj = DrawObject(null, sticker, DrawType.STICKER)
         stickerViewListener.onDone(obj)
     }

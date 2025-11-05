@@ -1,21 +1,23 @@
 package com.outsbook.libs.canvaseditor.stickers
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import androidx.core.graphics.drawable.toDrawable
+import pl.droidsonroids.gif.GifDrawable
 
-internal class BitmapSticker(
-    context: Context,
-    bitmap: Bitmap,
+class GifSticker(
+    private val context: Context,
+    private val gifDrawable: GifDrawable,
     override val x: Float = 0f,
     override val y: Float = 0f
 ) : Sticker() {
     private val realBounds: Rect
 
-    override var drawable: Drawable = bitmap.toDrawable(context.resources)
+    private var currentFrame = 0
+
+    override var drawable: Drawable = getDrawableByFrame(9)
 
     final override val width: Int
         get() = drawable.intrinsicWidth
@@ -27,7 +29,7 @@ internal class BitmapSticker(
         realBounds = Rect(0, 0, width, height)
     }
 
-    override fun setDrawable(drawable: Drawable): BitmapSticker {
+    override fun setDrawable(drawable: Drawable): GifSticker {
         this.drawable = drawable
         return this
     }
@@ -40,9 +42,23 @@ internal class BitmapSticker(
         canvas.restore()
     }
 
-    override fun setAlpha(alpha: Int): BitmapSticker {
+    override fun setAlpha(alpha: Int): GifSticker {
         drawable.alpha = alpha
         return this
+    }
+
+    fun updateFrame() {
+        currentFrame++
+        val drawable = getDrawableByFrame(currentFrame % totalFrame())
+        setDrawable(drawable)
+    }
+
+    private fun getDrawableByFrame(frame: Int): Drawable {
+        return gifDrawable.seekToFrameAndGet(frame).toDrawable(context.resources)
+    }
+
+    fun totalFrame(): Int {
+        return gifDrawable.numberOfFrames
     }
 
 }

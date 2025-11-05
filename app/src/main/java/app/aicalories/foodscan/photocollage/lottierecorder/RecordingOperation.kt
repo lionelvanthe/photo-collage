@@ -1,4 +1,4 @@
-package com.welly.myapplication.lottierecorder
+ package app.aicalories.foodscan.photocollage.lottierecorder
 
 class RecordingOperation(
     private val recorder: Recorder,
@@ -8,7 +8,7 @@ class RecordingOperation(
 
     fun start() {
         while (isRecording()) {
-            recorder.nextFrame(frameCreator.generateFrame())
+            recorder.nextFrame(frameCreator)
         }
         recorder.end()
         listener()

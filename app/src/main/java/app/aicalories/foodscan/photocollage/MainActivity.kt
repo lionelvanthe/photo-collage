@@ -34,6 +34,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pl.droidsonroids.gif.GifDrawable
 
 
 class MainActivity : AppCompatActivity() {
@@ -148,12 +149,15 @@ class MainActivity : AppCompatActivity() {
 
         binding.buttonStickerText.setOnClickListener{
             //Add text with drawable sticker
-            val drawable = ContextCompat.getDrawable(this, R.drawable.ic_panorama_240dp)
-            val text = "Canvas"
-            val textColor = ContextCompat.getColor(this, R.color.colorAccent)
-            drawable?.let{
-                binding.canvasEditor.addDrawableTextSticker(it, text, textColor, null)
-            }
+//            val drawable = ContextCompat.getDrawable(this, R.drawable.ic_panorama_240dp)
+//            val text = "Canvas"
+//            val textColor = ContextCompat.getColor(this, R.color.colorAccent)
+//            drawable?.let{
+//                binding.canvasEditor.addDrawableTextSticker(it, text, textColor, null)
+//            }
+
+            val gifDrawable = GifDrawable(this.assets, "sample.gif")
+            binding.canvasEditor.addGifSticker(gifDrawable)
         }
 
         binding.buttonBlack.setOnClickListener {
