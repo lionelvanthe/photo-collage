@@ -19,6 +19,8 @@ import com.outsbook.libs.canvaseditor.events.DeleteIconEvent
 import com.outsbook.libs.canvaseditor.events.ReplaceIconEvent
 import com.outsbook.libs.canvaseditor.events.ZoomIconEvent
 import com.outsbook.libs.canvaseditor.layer.DrawableLayer
+import com.outsbook.libs.canvaseditor.layer.GifLayer
+import com.outsbook.libs.canvaseditor.layer.Layer
 import com.outsbook.libs.canvaseditor.listeners.StickerViewListener
 import com.outsbook.libs.canvaseditor.models.DrawObject
 import com.outsbook.libs.canvaseditor.undoredo.CommandManager
@@ -78,7 +80,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     private val touchSlop: Int = ViewConfiguration.get(context).scaledTouchSlop
     private var currentIcon: StickerIcon? = null
-    private var layers = mutableListOf<DrawableLayer>()
+    private var layers = mutableListOf<Layer>()
     private var mScaleY = 1f
 
     init {
@@ -479,7 +481,11 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     fun addStickerToView(sticker: Sticker) {
         currentSticker = sticker
         currentMode = ActionMode.SELECT
-        val layer = DrawableLayer()
+        val layer = if (sticker is GifSticker) {
+            GifLayer()
+        } else {
+            DrawableLayer()
+        }
         layer.addSticker(sticker)
         layers.add(layer)
         invalidate()

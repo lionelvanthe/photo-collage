@@ -2,12 +2,12 @@ package app.aicalories.foodscan.photocollage.lottierecorder
 
 import android.graphics.Canvas
 import com.airbnb.lottie.LottieDrawable
-import com.outsbook.libs.canvaseditor.layer.DrawableLayer
-import com.outsbook.libs.canvaseditor.stickers.GifSticker
+import com.outsbook.libs.canvaseditor.layer.GifLayer
+import com.outsbook.libs.canvaseditor.layer.Layer
 
 class FrameCreator(
     private val lottieDrawable: LottieDrawable?,
-    private val layers: List<DrawableLayer>) {
+    private val layers: List<Layer>) {
     private val scale = lottieDrawable?.let {
         VIDEO_WIDTH_PX/it.intrinsicWidth
     }?: 1f
@@ -21,8 +21,8 @@ class FrameCreator(
 
     private fun getFrameOfGif(): Int {
         for (i in layers.size -1 downTo 0) {
-            if (layers[i].isContainsGifSicker()) {
-                return (layers[i].getFirstSticker() as? GifSticker)?.totalFrame()?: 1
+            if (layers[i] is GifLayer) {
+                return (layers[i] as? GifLayer)?.getTotalFrameOfGif()?: 1
             }
         }
         return 1
@@ -47,7 +47,7 @@ class FrameCreator(
         }
         for (layer in layers) {
             layer.draw(canvas)
-            layer.updateFrameGif()
+            (layer as? GifLayer)?.updateFrameGif()
         }
         currentFrame++
     }
