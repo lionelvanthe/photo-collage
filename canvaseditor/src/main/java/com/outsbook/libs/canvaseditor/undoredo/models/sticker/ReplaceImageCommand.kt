@@ -1,4 +1,4 @@
-package com.outsbook.libs.canvaseditor.models.undoredo
+package com.outsbook.libs.canvaseditor.undoredo.models.sticker
 
 import android.graphics.Matrix
 import android.graphics.drawable.Drawable
@@ -10,18 +10,17 @@ internal class ReplaceImageCommand(
     private val drawable: Drawable,
     private val matrix: Matrix? = null,
     private val sticker: DrawableSticker,
-    private val stickerView: StickerView
-) : Command {
+) : StickerCommand {
 
-    override fun execute() {
-        stickerView.updateDrawableOfSticker(drawable, sticker, null)
+    override fun execute(target: StickerView) {
+        target.updateDrawableOfSticker(drawable, sticker, null)
     }
 
-    override fun undo() {
-        stickerView.updateDrawableOfSticker(preDrawable, sticker, matrix)
+    override fun undo(target: StickerView) {
+        target.updateDrawableOfSticker(preDrawable, sticker, matrix)
     }
 
-    override fun redo() {
-        execute()
+    override fun redo(target: StickerView) {
+        execute(target)
     }
 }

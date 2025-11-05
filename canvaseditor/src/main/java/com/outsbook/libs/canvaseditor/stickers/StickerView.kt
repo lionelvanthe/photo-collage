@@ -10,7 +10,6 @@ import android.view.ViewConfiguration
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
-import com.outsbook.libs.canvaseditor.CommandManager
 import com.outsbook.libs.canvaseditor.R
 import com.outsbook.libs.canvaseditor.constants.ActionMode
 import com.outsbook.libs.canvaseditor.constants.ConstantSticker
@@ -21,11 +20,12 @@ import com.outsbook.libs.canvaseditor.events.ReplaceIconEvent
 import com.outsbook.libs.canvaseditor.events.ZoomIconEvent
 import com.outsbook.libs.canvaseditor.listeners.StickerViewListener
 import com.outsbook.libs.canvaseditor.models.DrawObject
-import com.outsbook.libs.canvaseditor.models.undoredo.AddStickerCommand
-import com.outsbook.libs.canvaseditor.models.undoredo.MoveStickerCommand
-import com.outsbook.libs.canvaseditor.models.undoredo.RemoveStickerCommand
-import com.outsbook.libs.canvaseditor.models.undoredo.ReplaceImageCommand
-import com.outsbook.libs.canvaseditor.models.undoredo.ZoomAndRotateStickerCommand
+import com.outsbook.libs.canvaseditor.undoredo.CommandManager
+import com.outsbook.libs.canvaseditor.undoredo.models.sticker.AddStickerCommand
+import com.outsbook.libs.canvaseditor.undoredo.models.sticker.MoveStickerCommand
+import com.outsbook.libs.canvaseditor.undoredo.models.sticker.RemoveStickerCommand
+import com.outsbook.libs.canvaseditor.undoredo.models.sticker.ReplaceImageCommand
+import com.outsbook.libs.canvaseditor.undoredo.models.sticker.ZoomAndRotateStickerCommand
 import java.util.*
 import kotlin.math.abs
 import kotlin.math.atan2
@@ -70,7 +70,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
     }
 
     private val commendManager by lazy {
-        CommandManager()
+        CommandManager<StickerView>(this)
     }
 
     private var multiTouchUp = false
@@ -378,7 +378,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
                         val fromMatrix = Matrix(downMatrix)
                         val toMatrix = Matrix(sticker.matrix)
                         commendManager.execute(
-                            MoveStickerCommand(fromMatrix, toMatrix, sticker, this)
+                            MoveStickerCommand(fromMatrix, toMatrix, sticker)
                         )
                     }
                     stickerViewListener.canRedo(commendManager.canRedo())
@@ -413,7 +413,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             val fromMatrix = Matrix(downMatrix)
             val toMatrix = Matrix(sticker.matrix)
             commendManager.execute(
-                ZoomAndRotateStickerCommand(fromMatrix, toMatrix, sticker, this)
+                ZoomAndRotateStickerCommand(fromMatrix, toMatrix, sticker)
             )
         }
         stickerViewListener.canRedo(commendManager.canRedo())
@@ -461,7 +461,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
 
     fun executeAddSticker(sticker: Sticker) {
         commendManager.execute(
-            AddStickerCommand(sticker, this)
+            AddStickerCommand(sticker)
         )
         stickerViewListener.canRedo(commendManager.canRedo())
         stickerViewListener.canUndo(commendManager.canUndo())
@@ -548,7 +548,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
             updateImageCurrentSticker(sticker.defaultDrawable)
         } else {
             commendManager.execute(
-                RemoveStickerCommand(sticker, this)
+                RemoveStickerCommand(sticker)
             )
             stickerViewListener.canRedo(commendManager.canRedo())
             stickerViewListener.canUndo(commendManager.canUndo())
@@ -608,7 +608,7 @@ internal class StickerView(context: Context, private val stickerViewListener: St
         currentSticker?.let {
             val matrix = Matrix(it.matrix)
             commendManager.execute(
-                ReplaceImageCommand(it.drawable, drawable, matrix, it as DrawableSticker, this)
+                ReplaceImageCommand(it.drawable, drawable, matrix, it as DrawableSticker)
             )
         }
         stickerViewListener.canRedo(commendManager.canRedo())

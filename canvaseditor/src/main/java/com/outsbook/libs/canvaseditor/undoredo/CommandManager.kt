@@ -1,14 +1,16 @@
-package com.outsbook.libs.canvaseditor
+package com.outsbook.libs.canvaseditor.undoredo
 
-import com.outsbook.libs.canvaseditor.models.undoredo.Command
+import com.outsbook.libs.canvaseditor.undoredo.models.Command
 
-class CommandManager {
+internal open class CommandManager<T>(
+    private val target: T
+) {
 
-    private val undoStack = ArrayDeque<Command>()
-    private val redoStack = ArrayDeque<Command>()
+    private val undoStack = ArrayDeque<Command<T>>()
+    private val redoStack = ArrayDeque<Command<T>>()
 
-    fun execute(command: Command) {
-        command.execute()
+    fun execute(command: Command<T>) {
+        command.execute(target)
         undoStack.addLast(command)
         redoStack.clear()
     }
@@ -16,7 +18,7 @@ class CommandManager {
     fun undo() {
         if (undoStack.isNotEmpty()) {
             val cmd = undoStack.removeLast()
-            cmd.undo()
+            cmd.undo(target)
             redoStack.addLast(cmd)
         }
     }
@@ -24,7 +26,7 @@ class CommandManager {
     fun redo() {
         if (redoStack.isNotEmpty()) {
             val cmd = redoStack.removeLast()
-            cmd.redo()
+            cmd.redo(target)
             undoStack.addLast(cmd)
         }
     }

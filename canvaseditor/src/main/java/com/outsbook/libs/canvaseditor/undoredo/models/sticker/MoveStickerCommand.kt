@@ -1,4 +1,4 @@
-package com.outsbook.libs.canvaseditor.models.undoredo
+package com.outsbook.libs.canvaseditor.undoredo.models.sticker
 
 import android.graphics.Matrix
 import com.outsbook.libs.canvaseditor.stickers.Sticker
@@ -9,20 +9,18 @@ internal class MoveStickerCommand(
     private val fromMatrix: Matrix,
     private val toMatrix: Matrix,
     private val sticker: Sticker,
-    private val stickerView: StickerView
-) : Command {
+) : StickerCommand {
 
-
-    override fun execute() {
+    override fun execute(target: StickerView) {
     }
 
-    override fun undo() {
+    override fun undo(target: StickerView) {
         sticker.setMatrix(fromMatrix)
-        stickerView.invalidate()
+        target.invalidate()
     }
 
-    override fun redo() {
+    override fun redo(target: StickerView) {
         sticker.setMatrix(toMatrix)
-        stickerView.invalidate()
+        target.invalidate()
     }
 }
